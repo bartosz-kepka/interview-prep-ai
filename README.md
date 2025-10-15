@@ -1,94 +1,100 @@
-# 10x Astro Starter
+# InterviewPrep AI
 
-A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
+[![Project Status: MVP](https://img.shields.io/badge/status-MVP-green.svg)](https://shields.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+InterviewPrep AI is a web application designed to help job candidates effectively prepare for interviews. It allows users to generate a personalized set of interview questions directly from the text of a job posting, moving beyond generic, one-size-fits-all question lists.
+
+## Table of Contents
+
+- [Tech Stack](#tech-stack)
+- [Getting Started Locally](#getting-started-locally)
+- [Available Scripts](#available-scripts)
+- [Project Scope](#project-scope)
+- [Project Status](#project-status)
+- [License](#license)
 
 ## Tech Stack
 
-- [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
-- [React](https://react.dev/) v19.0.0 - UI library for building interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
+- **Frontend**: Astro 5, React 19, TypeScript 5, Tailwind 4, Shadcn/ui
+- **Backend**: Supabase (PostgreSQL, Authentication, BaaS)
+- **AI Integration**: Openrouter.ai
+- **CI/CD & Hosting**: GitHub Actions, DigitalOcean (Docker)
 
-## Prerequisites
+## Getting Started Locally
 
-- Node.js v22.14.0 (as specified in `.nvmrc`)
-- npm (comes with Node.js)
+To set up and run this project on your local machine, follow these steps:
 
-## Getting Started
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/interview-prep-ai.git
+    cd interview-prep-ai
+    ```
 
-1. Clone the repository:
+2.  **Set the Node.js version:**
+    The project requires Node.js version `22.14.0`. We recommend using a version manager like `nvm`.
+    ```bash
+    nvm use
+    ```
 
-```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
-```
+3.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-2. Install dependencies:
+4.  **Set up environment variables:**
+    Create a `.env` file in the root of the project and add the necessary environment variables for Supabase and Openrouter.ai.
+    ```env
+    # Supabase
+    PUBLIC_SUPABASE_URL="your-supabase-url"
+    PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
 
-```bash
-npm install
-```
+    # Openrouter.ai
+    OPENROUTER_API_KEY="your-openrouter-api-key"
+    ```
 
-3. Run the development server:
-
-```bash
-npm run dev
-```
-
-4. Build for production:
-
-```bash
-npm run build
-```
+5.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    The application will be available at `http://localhost:3000`.
 
 ## Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
+The following scripts are available in the `package.json`:
 
-## Project Structure
+- `npm run dev`: Starts the development server.
+- `npm run build`: Builds the application for production.
+- `npm run preview`: Previews the production build locally.
+- `npm run lint`: Lints the codebase for errors.
+- `npm run lint:fix`: Lints the codebase and automatically fixes issues.
+- `npm run format`: Formats the code using Prettier.
 
-```md
-.
-├── src/
-│   ├── layouts/    # Astro layouts
-│   ├── pages/      # Astro pages
-│   │   └── api/    # API endpoints
-│   ├── components/ # UI components (Astro & React)
-│   └── assets/     # Static assets
-├── public/         # Public assets
-```
+## Project Scope
 
-## AI Development Support
+### MVP Features
 
-This project is configured with AI development tools to enhance the development experience, providing guidelines for:
+- **User Authentication**: Secure user registration, login, email verification, and password reset.
+- **Manual Question Management (CRUD)**: Users can create, view, edit, and delete their own interview questions and answers.
+- **AI Question Generator**: Generate 10-15 relevant interview questions by pasting the text of a job description.
+- **Search**: Real-time, case-insensitive search through question titles.
+- **Responsive Design**: A mobile-first approach ensures a seamless experience on all devices.
 
-- Project structure
-- Coding practices
-- Frontend development
-- Styling with Tailwind
-- Accessibility best practices
-- Astro and React guidelines
+### Out of Scope for MVP
 
-### Cursor IDE
+The following features are planned for future releases and are not part of the current MVP:
 
-The project includes AI rules in `.cursor/rules/` directory that help Cursor IDE understand the project structure and provide better code suggestions.
+- Question categorization and "interview session" folders.
+- AI-powered evaluation of user answers.
+- Real-time mock interview simulations.
+- Analytics and progress tracking.
+- Social logins (e.g., Google, LinkedIn).
 
-### GitHub Copilot
+## Project Status
 
-AI instructions for GitHub Copilot are available in `.github/copilot-instructions.md`
-
-### Windsurf
-
-The `.windsurfrules` file contains AI configuration for Windsurf.
-
-## Contributing
-
-Please follow the AI guidelines and coding practices defined in the AI configuration files when contributing to this project.
+The project is currently in the **Minimum Viable Product (MVP)** development phase. The core features are being implemented, and the application is not yet considered production-ready.
 
 ## License
 
-MIT
+This project is licensed under the MIT License.
+
