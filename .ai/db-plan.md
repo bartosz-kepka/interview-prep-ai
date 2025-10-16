@@ -16,6 +16,10 @@ CREATE TYPE question_source AS ENUM ('user', 'ai', 'ai-edited');
 CREATE TYPE generation_status AS ENUM ('success', 'error');
 ```
 
+### `users` Table
+
+This table will be managed by Supabase's built-in authentication system. It stores user credentials and metadata.
+
 ### `questions` Table
 
 This table stores the questions and answers created by users.
