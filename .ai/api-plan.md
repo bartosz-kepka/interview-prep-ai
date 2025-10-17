@@ -177,7 +177,6 @@
 -   **JSON Response Payload**:
     ```json
     {
-      "message": "Successfully saved 2 questions.",
       "saved_question_ids": ["uuid-1", "uuid-2"]
     }
     ```
