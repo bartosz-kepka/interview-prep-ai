@@ -16,9 +16,9 @@
 -   **Description**: Retrieves a paginated list of questions for the authenticated user, with options for sorting and searching.
 -   **Query Parameters**:
     -   `page` (number, optional, default: 1): The page number for pagination.
-    -   `pageSize` (number, optional, default: 10): The number of items per page.
-    -   `sortBy` (string, optional, default: 'created_at'): Field to sort by.
-    -   `sortOrder` (string, optional, default: 'desc'): Sort order ('asc' or 'desc').
+    -   `page_size` (number, optional, default: 10): The number of items per page.
+    -   `sort_by` (string, optional, default: 'created_at'): Field to sort by.
+    -   `sort_order` (string, optional, default: 'desc'): Sort order ('asc' or 'desc').
     -   `search` (string, optional): A search term to filter questions by their content.
 -   **JSON Response Payload**:
     ```json
@@ -29,14 +29,14 @@
           "question": "What is your greatest strength?",
           "answer": "My ability to learn quickly.",
           "source": "user",
-          "createdAt": "iso-8601-timestamp"
+          "created_at": "iso-8601-timestamp"
         }
       ],
       "pagination": {
         "page": 1,
-        "pageSize": 10,
-        "totalItems": 100,
-        "totalPages": 10
+        "page_size": 10,
+        "total_items": 100,
+        "total_pages": 10
       }
     }
     ```
@@ -62,7 +62,7 @@
       "question": "What is your greatest weakness?",
       "answer": "Public speaking.",
       "source": "user",
-      "createdAt": "iso-8601-timestamp"
+      "created_at": "iso-8601-timestamp"
     }
     ```
 -   **Success Codes**: `201 Created`
@@ -71,7 +71,7 @@
 #### Get a Single Question
 
 -   **HTTP Method**: `GET`
--   **URL Path**: `/api/questions/{questionId}`
+-   **URL Path**: `/api/questions/{question_id}`
 -   **Description**: Retrieves a single question by its ID.
 -   **JSON Response Payload**:
     ```json
@@ -80,8 +80,8 @@
       "question": "What is your greatest strength?",
       "answer": "My ability to learn quickly.",
       "source": "user",
-      "createdAt": "iso-8601-timestamp",
-      "updatedAt": "iso-8601-timestamp"
+      "created_at": "iso-8601-timestamp",
+      "updated_at": "iso-8601-timestamp"
     }
     ```
 -   **Success Codes**: `200 OK`
@@ -90,7 +90,7 @@
 #### Update a Question
 
 -   **HTTP Method**: `PATCH`
--   **URL Path**: `/api/questions/{questionId}`
+-   **URL Path**: `/api/questions/{question_id}`
 -   **Description**: Updates an existing question.
 -   **JSON Request Payload**:
     ```json
@@ -106,8 +106,8 @@
       "question": "What is your most significant achievement?",
       "answer": "Leading a successful project under a tight deadline.",
       "source": "user",
-      "createdAt": "iso-8601-timestamp",
-      "updatedAt": "iso-8601-timestamp"
+      "created_at": "iso-8601-timestamp",
+      "updated_at": "iso-8601-timestamp"
     }
     ```
 -   **Success Codes**: `200 OK`
@@ -116,7 +116,7 @@
 #### Delete a Question
 
 -   **HTTP Method**: `DELETE`
--   **URL Path**: `/api/questions/{questionId}`
+-   **URL Path**: `/api/questions/{question_id}`
 -   **Description**: Deletes a question.
 -   **Success Codes**: `204 No Content`
 -   **Error Codes**: `401 Unauthorized`, `404 Not Found`
@@ -131,14 +131,14 @@
 -   **JSON Request Payload**:
     ```json
     {
-      "sourceText": "We are looking for a Senior Software Engineer with experience in React, Node.js, and PostgreSQL..."
+      "source_text": "We are looking for a Senior Software Engineer with experience in React, Node.js, and PostgreSQL..."
     }
     ```
 -   **JSON Response Payload**:
     ```json
     {
-      "generationLogId": "uuid",
-      "questionProposals": [
+      "generation_log_id": "uuid",
+      "question_proposals": [
         {
           "question": "Can you describe your experience with React and Node.js?"
         },
@@ -159,7 +159,7 @@
 -   **JSON Request Payload**:
     ```json
     {
-      "generationLogId": "uuid",
+      "generation_log_id": "uuid",
       "questions": [
         {
           "question": "Can you describe your experience with React and modern JavaScript?",
@@ -178,11 +178,11 @@
     ```json
     {
       "message": "Successfully saved 2 questions.",
-      "savedQuestionIds": ["uuid-1", "uuid-2"]
+      "saved_question_ids": ["uuid-1", "uuid-2"]
     }
     ```
 -   **Success Codes**: `201 Created`
--   **Error Codes**: `400 Bad Request`, `401 Unauthorized`, `404 Not Found` (if `generationLogId` is invalid), `422 Unprocessable Entity`
+-   **Error Codes**: `400 Bad Request`, `401 Unauthorized`, `404 Not Found` (if `generation_log_id` is invalid), `422 Unprocessable Entity`
 
 ## 3. Authentication and Authorization
 
@@ -199,13 +199,13 @@
 
 ### Validation
 
--   **`POST /api/questions`** & **`PATCH /api/questions/{questionId}`**:
+-   **`POST /api/questions`** & **`PATCH /api/questions/{question_id}`**:
     -   `question`: Required, string, not blank, max 10,000 characters.
     -   `answer`: Optional, string, max 10,000 characters.
 -   **`POST /api/ai/generate-questions`**:
-    -   `sourceText`: Required, string, not blank, max 10,000 characters.
+    -   `source_text`: Required, string, not blank, max 10,000 characters.
 -   **`POST /api/ai/save-questions`**:
-    -   `generationLogId`: Required, UUID format.
+    -   `generation_log_id`: Required, UUID format.
     -   `questions`: Required, array of objects.
         -   `question`: Required, string, not blank, max 10,000 characters.
         -   `edited`: Required, boolean.
@@ -224,7 +224,7 @@ Input validation will be performed in the API route handlers using `zod` before 
     4.  On failure, it updates the log with `error_details`, `finished_at`, and `status: 'error'`.
     5.  Parses the AI response and returns a clean list of question proposals to the client.
 -   **`POST /ai/save-questions`**:
-    1.  Receives a list of questions and the `generationLogId`.
+    1.  Receives a list of questions and the `generation_log_id`.
     2.  Iterates through the list and creates a new record in the `questions` table for each item.
     3.  For each new question, it sets the `source` to `'ai'` or `'ai-edited'`, basing on the `edited` field, and links it to the original log via `generation_log_id`.
     4.  The `updated_at` trigger in the database will automatically manage the `updated_at` field for any updates to questions.
