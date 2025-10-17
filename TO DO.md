@@ -1,3 +1,0 @@
-- Dodaj trzeci możliwy typ pytania: ai-edited (pytania wygenerowane przez AI, ale edytowane przez użytkownika przed zapisaniem)
-- Akcje generowania pytań maja być zapisywane w bazie
-- Logi błędów akcji generowania pytań maja być zapisywane w bazie

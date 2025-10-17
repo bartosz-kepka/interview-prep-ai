@@ -98,3 +98,6 @@ The project is currently in the **Minimum Viable Product (MVP)** development pha
 
 This project is licensed under the MIT License.
 
+## Dev Notes
+
+- As of Supabase CLI version 2.48.x, to get the anon key (used for `SUPABASE_KEY` env variable) , you need to use the `supabase status -o env` command.
