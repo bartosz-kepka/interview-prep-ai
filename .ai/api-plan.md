@@ -127,7 +127,7 @@
 
 -   **HTTP Method**: `POST`
 -   **URL Path**: `/api/ai/generate-questions`
--   **Description**: Initiates the AI question generation process based on the provided job offer text. It creates a log entry, calls the external AI service, and returns the generated questions for user review.
+-   **Description**: Initiates the AI question generation process based on the provided job offer text. It creates a log entry, calls the external AI service, and returns the generated question proposals for user review.
 -   **JSON Request Payload**:
     ```json
     {
@@ -138,7 +138,7 @@
     ```json
     {
       "generationLogId": "uuid",
-      "questions": [
+      "questionProposals": [
         {
           "question": "Can you describe your experience with React and Node.js?"
         },
@@ -219,10 +219,10 @@ Input validation will be performed in the API route handlers using `zod` before 
 -   **`POST /api/questions`**: When a question is created manually, the `source` column is automatically set to `'user'`.
 -   **`POST /ai/generate-questions`**:
     1.  Creates a record in `ai_generation_logs` with the user's ID and the prompt.
-    2.  Sends the `sourceText` to the external AI service (e.g., OpenRouter).
+    2.  Sends the `source_text` to the external AI service (e.g., OpenRouter).
     3.  On a successful response from the AI, it updates the log entry with the raw response, `finished_at` timestamp, and `status: 'success'`.
     4.  On failure, it updates the log with `error_details`, `finished_at`, and `status: 'error'`.
-    5.  Parses the AI response and returns a clean list of questions to the client.
+    5.  Parses the AI response and returns a clean list of question proposals to the client.
 -   **`POST /ai/save-questions`**:
     1.  Receives a list of questions and the `generationLogId`.
     2.  Iterates through the list and creates a new record in the `questions` table for each item.
