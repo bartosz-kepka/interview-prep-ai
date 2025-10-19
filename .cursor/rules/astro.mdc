@@ -12,6 +12,8 @@ alwaysApply: false
 - Use `export const prerender = false` for API routes
 - Use zod for input validation in API routes
 - Extract logic into services in `src/lib/services`
+- Use arrow functions and explicitly use APIRoute type from `astro` for API route handlers
+- Use arrow functions for services and helpers in `src/lib`
 - Implement middleware for request/response modification
 - Use image optimization with the Astro Image integration
 - Implement hybrid rendering with server-side rendering where needed
