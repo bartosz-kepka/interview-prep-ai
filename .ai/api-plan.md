@@ -43,6 +43,9 @@
 -   **Success Codes**: `200 OK`
 -   **Error Codes**: `401 Unauthorized`
 
+-   **Business Logic**:
+    -   Implements pagination, sorting by `created_at` (default) or other fields, and full-text search functionality using the `pg_trgm` index on the `question` column.
+
 #### Create a Question
 
 -   **HTTP Method**: `POST`
@@ -67,6 +70,12 @@
     ```
 -   **Success Codes**: `201 Created`
 -   **Error Codes**: `400 Bad Request`, `401 Unauthorized`, `422 Unprocessable Entity`
+
+-   **Validation**:
+    -   `question`: Required, string, not blank, max 10,000 characters.
+    -   `answer`: Optional, string, max 10,000 characters.
+-   **Business Logic**:
+    -   When a question is created manually, the `source` column is automatically set to `'user'`.
 
 #### Get a Single Question
 
@@ -113,6 +122,10 @@
 -   **Success Codes**: `200 OK`
 -   **Error Codes**: `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `422 Unprocessable Entity`
 
+-   **Validation**:
+    -   `question`: Optional, string, not blank, max 10,000 characters.
+    -   `answer`: Optional, string, max 10,000 characters.
+
 #### Delete a Question
 
 -   **HTTP Method**: `DELETE`
@@ -151,6 +164,15 @@
 -   **Success Codes**: `200 OK`
 -   **Error Codes**: `400 Bad Request`, `401 Unauthorized`, `422 Unprocessable Entity`, `500 Internal Server Error`, `502 Bad Gateway`
 
+-   **Validation**:
+    -   `source_text`: Required, string, not blank, max 10,000 characters.
+-   **Business Logic**:
+    1.  Creates a record in `ai_generation_logs` with the user's ID and the prompt.
+    2.  Sends the `source_text` to the external AI service (e.g., OpenRouter).
+    3.  On a successful response from the AI, it updates the log entry with the raw response, `finished_at` timestamp, and `status: 'success'`.
+    4.  On failure, it updates the log with `error_details`, `finished_at`, and `status: 'error'`.
+    5.  Parses the AI response and returns a clean list of question proposals to the client.
+
 #### Save Generated Questions
 
 -   **HTTP Method**: `POST`
@@ -183,6 +205,18 @@
 -   **Success Codes**: `201 Created`
 -   **Error Codes**: `400 Bad Request`, `401 Unauthorized`, `404 Not Found` (if `generation_log_id` is invalid), `422 Unprocessable Entity`
 
+-   **Validation**:
+    -   `generation_log_id`: Required, UUID format.
+    -   `questions`: Required, array of objects.
+        -   `question`: Required, string, not blank, max 10,000 characters.
+        -   `edited`: Required, boolean.
+        -   `answer`: Optional, string, max 10,000 characters.
+-   **Business Logic**:
+    1.  Receives a list of questions and the `generation_log_id`.
+    2.  Iterates through the list and creates a new record in the `questions` table for each item.
+    3.  For each new question, it sets the `source` to `'ai'` or `'ai-edited'`, basing on the `edited` field, and links it to the original log via `generation_log_id`.
+    4.  The `updated_at` trigger in the database will automatically manage the `updated_at` field for any updates to questions.
+
 ## 3. Authentication and Authorization
 
 -   **Mechanism**: Authentication will be handled using JSON Web Tokens (JWT) provided by Supabase Auth.
@@ -194,36 +228,6 @@
     5.  The authenticated user's ID will be used to enforce Row-Level Security (RLS) policies at the database level, ensuring users can only access and modify their own data.
     6.  Endpoints that require authentication will return a `401 Unauthorized` error if the token is missing, invalid, or expired.
 
-## 4. Validation and Business Logic
-
-### Validation
-
--   **`POST /api/questions`** & **`PATCH /api/questions/{question_id}`**:
-    -   `question`: Required, string, not blank, max 10,000 characters.
-    -   `answer`: Optional, string, max 10,000 characters.
--   **`POST /api/ai/generate-questions`**:
-    -   `source_text`: Required, string, not blank, max 10,000 characters.
--   **`POST /api/ai/save-questions`**:
-    -   `generation_log_id`: Required, UUID format.
-    -   `questions`: Required, array of objects.
-        -   `question`: Required, string, not blank, max 10,000 characters.
-        -   `edited`: Required, boolean.
-        -   `answer`: Optional, string, max 10,000 characters.
+## 4. Shared Validation
 
 Input validation will be performed in the API route handlers using `zod` before any database operations occur.
-
-### Business Logic
-
--   **`GET /api/questions`**: Implements pagination, sorting by `created_at` (default) or other fields, and full-text search functionality using the `pg_trgm` index on the `question` column.
--   **`POST /api/questions`**: When a question is created manually, the `source` column is automatically set to `'user'`.
--   **`POST /ai/generate-questions`**:
-    1.  Creates a record in `ai_generation_logs` with the user's ID and the prompt.
-    2.  Sends the `source_text` to the external AI service (e.g., OpenRouter).
-    3.  On a successful response from the AI, it updates the log entry with the raw response, `finished_at` timestamp, and `status: 'success'`.
-    4.  On failure, it updates the log with `error_details`, `finished_at`, and `status: 'error'`.
-    5.  Parses the AI response and returns a clean list of question proposals to the client.
--   **`POST /ai/save-questions`**:
-    1.  Receives a list of questions and the `generation_log_id`.
-    2.  Iterates through the list and creates a new record in the `questions` table for each item.
-    3.  For each new question, it sets the `source` to `'ai'` or `'ai-edited'`, basing on the `edited` field, and links it to the original log via `generation_log_id`.
-    4.  The `updated_at` trigger in the database will automatically manage the `updated_at` field for any updates to questions.
