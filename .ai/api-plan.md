@@ -227,7 +227,3 @@
     4.  Astro middleware on the server will intercept incoming requests, validate the JWT using Supabase's helper functions, and extract the user's identity.
     5.  The authenticated user's ID will be used to enforce Row-Level Security (RLS) policies at the database level, ensuring users can only access and modify their own data.
     6.  Endpoints that require authentication will return a `401 Unauthorized` error if the token is missing, invalid, or expired.
-
-## 4. Validation
-
-Input validation will be performed in the API route handlers using `zod` before any database operations occur.

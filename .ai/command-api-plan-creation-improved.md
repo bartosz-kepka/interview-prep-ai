@@ -71,9 +71,6 @@ For each resource provide:
 
 ## 3. Authentication and Authorization
 - Describe the chosen authentication mechanism and implementation details
-
-## 4. Validation
-- Describe the chosen validation mechanism and implementation details
 ```
 
 Ensure your plan is comprehensive, well-structured, and addresses all aspects of the input materials. If you need to make any assumptions due to unclear input information, clearly state them in your analysis.
