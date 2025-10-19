@@ -1,7 +1,7 @@
 # API Endpoint Implementation Plan: Generate Questions from Job Offer
 
 ## 1. Endpoint Overview
-This document outlines the implementation plan for the `POST /api/ai/generate-questions` endpoint. Its purpose is to accept a job offer text from an authenticated user, leverage an external AI service to generate relevant interview questions, and return these questions as proposals for the user to review. The entire process, including any errors, is logged for monitoring and auditing purposes.
+This document outlines the implementation plan for the `POST /api/ai/generate-questions` endpoint. Its purpose is to accept a job offer text from a user, leverage an external AI service to generate relevant interview questions (mock for now), and return these questions as proposals for the user to review. The entire process, including any errors, is logged for monitoring and auditing purposes.
 
 ## 2. Request Details
 -   **HTTP Method**: `POST`
@@ -35,17 +35,15 @@ This document outlines the implementation plan for the `POST /api/ai/generate-qu
     ```
 -   **Error**: Returns a standard JSON error object with a descriptive message.
     -   `400 Bad Request`: If input validation fails.
-    -   `401 Unauthorized`: If the user is not authenticated.
     -   `500 Internal Server Error`: For unexpected server-side issues (e.g., database connection failure).
     -   `502 Bad Gateway`: If the external AI service fails or returns an error.
 
 ## 5. Data Flow
 1.  The client sends a `POST` request with the job offer text to `/api/ai/generate-questions`.
-2.  The Astro middleware (`src/middleware/index.ts`) verifies the user's authentication status and attaches the user session to `context.locals`.
 3.  The API route handler (`src/pages/api/ai/generate-questions.ts`) receives the request.
 4.  It validates the request body using a Zod schema. If invalid, it returns a `400` error.
-5.  It retrieves the authenticated user's ID and the Supabase client from `context.locals`.
-6.  It calls the `generateQuestions` function in the `AiGenerationService` (`src/lib/ai/generation.service.ts`), passing the `source_text` and user ID.
+5.  It retrieves the Supabase client from `context.locals`.
+6.  It calls the `generateQuestions` function in the `AiGenerationService` (`src/lib/ai/generation.service.ts`), passing the `source_text` and the DEV_USER_ID from `src/db/supabase.client.ts` as the user id.
 7.  The service creates an initial record in the `ai_generation_logs` table with the user ID and the prompt.
 8.  The service constructs a detailed prompt for the AI model and makes an API call to OpenRouter.
 9.  **On AI Success**: The service parses the AI's response to extract the questions. It then updates the log entry with `status: 'success'`, the `finished_at` timestamp, and the raw AI response.
@@ -53,7 +51,7 @@ This document outlines the implementation plan for the `POST /api/ai/generate-qu
 11. The API route receives the result from the service and sends the appropriate response to the client (`200 OK` on success, or a `5xx` error code on failure).
 
 ## 6. Security Considerations
--   **Authentication**: The endpoint will be protected by the existing authentication middleware. All requests must include a valid session token. Unauthenticated requests will be rejected with a `401 Unauthorized` error.
+-   **Authentication**: The endpoint will not contain authentication in this stage because authentication is not yet implemented. In the future, it will verify the user's identity via `context.locals.user`. For now, it will use a constant DEV_USER_ID.
 -   **Authorization**: The RLS policies on the `ai_generation_logs` table ensure that users can only create and view their own log entries, preventing data leakage between users.
 -   **Input Validation**: Strict validation of `source_text` via Zod mitigates risks associated with oversized payloads.
 -   **Prompt Injection**: The system prompt sent to the AI will be engineered to be robust, instructing the model to strictly adhere to the task of generating questions and to ignore any conflicting instructions within the user-provided `source_text`.
@@ -76,6 +74,7 @@ This document outlines the implementation plan for the `POST /api/ai/generate-qu
     -   Create a `generateQuestions` function that accepts `source_text`, `userId`, and a `SupabaseClient` instance.
     -   **Step 1: Create Log**: Insert a new record into `ai_generation_logs` with the `prompt` and `user_id`. Store the `generation_log_id` of the new record.
     -   **Step 2: Call AI**: Use `fetch` to make a `POST` request to the OpenRouter API. Construct a system prompt that instructs the AI to return a JSON array of question objects.
+      - IMPORTANT: In this stage, mock the AI response for development purposes.
     -   **Step 3: Handle Response**:
         -   If the AI call is successful, parse the JSON response.
         -   Update the log record with `status: 'success'`, `finished_at`, and the raw `response`.
@@ -86,7 +85,6 @@ This document outlines the implementation plan for the `POST /api/ai/generate-qu
 
 4. **Implement the API Route (`generate-questions.ts`)**:
     -   Define an `POST` handler that takes `APIContext`.
-    -   Check for an authenticated user via `context.locals.user`. If not present, return a `401` response.
     -   Parse and validate the request body using the Zod schema. If validation fails, return a `400` response.
     -   Wrap the call to the `AiGenerationService` in a `try...catch` block.
     -   On success, return a `200 OK` response with the `GenerateQuestionsResponseDto`.
