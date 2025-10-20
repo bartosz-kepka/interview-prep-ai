@@ -5,12 +5,6 @@ import { BadGatewayError, InternalServerError } from '../errors';
 /**
  * Generates interview questions from the provided source text using an AI service.
  * This function handles logging the generation process and mocking the AI response for development.
- *
- * @param source_text - The job offer text to generate questions from.
- * @param userId - The ID of the user requesting the generation.
- * @param supabase - The Supabase client instance for database operations.
- * @returns An object containing the generation log ID and the array of question proposals.
- * @throws Error if database operations fail or AI call encounters an issue.
  */
 export const generateQuestions = async (
   source_text: string,
