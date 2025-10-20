@@ -117,13 +117,14 @@ When modifying the directory structure, always update this section.
 
 - Leverage View Transitions API for smooth page transitions (use ClientRouter)
 - Use content collections with type safety for blog posts, documentation, etc.
-- Leverage Server Endpoints for API routes
+  - Leverage Server Endpoints for API routes    
 - Use POST, GET  - uppercase format for endpoint handlers
 - Use `export const prerender = false` for API routes
 - Use zod for input validation in API routes
 - Extract logic into services in `src/lib/services`
 - Use arrow functions and explicitly use APIRoute type from `astro` for API route handlers
-- Use arrow functions for services and helpers in `src/lib`
+- When defining API route handlers, use object destructuring on the context parameter
+- Use arrow functions for services and helpers in `src/lib` and subdirectories
 - Implement middleware for request/response modification
 - Use image optimization with the Astro Image integration
 - Implement hybrid rendering with server-side rendering where needed
