@@ -1,356 +1,144 @@
 # OpenRouter Service Implementation Guide
 
-This document provides a comprehensive guide for implementing the OpenRouter service, which will act as a dedicated client for interacting with the OpenRouter API to handle LLM chat completions.
+This document provides a comprehensive guide for implementing the `OpenRouterService`, which will act as a client for the OpenRouter.ai API to facilitate interactions with various Large Language Models (LLMs).
 
 ## 1. Service Description
 
-The `OpenRouterService` will be a TypeScript class responsible for all communication with the OpenRouter API. It will encapsulate the logic for building requests, sending them to the API, and parsing the responses. The service will be designed to be reusable and configurable, allowing different parts of the application to leverage various LLM models with structured outputs. It will handle API key management, error handling, and request/response formatting according to the OpenRouter API specification.
+The `OpenRouterService` is a TypeScript class designed to abstract the complexity of communicating with the OpenRouter API. Its primary responsibility is to construct and send chat completion requests, handle structured JSON responses, and manage API-related errors. It will be used within the `generation.service.ts` to replace the current mocked implementation, enabling real AI-powered question generation.
 
-## 2. Constructor
+The service will be configurable, allowing developers to specify the model, system prompt, and other parameters on a per-request basis. It will leverage Zod for robust validation of the structured data returned by the LLM.
 
-The service will be initialized with the OpenRouter API key. This key should be retrieved from environment variables to ensure it is not hardcoded.
+## 2. Constructor Description
 
-### `constructor(apiKey: string)`
-
-- **`apiKey`**: The API key for authenticating with the OpenRouter service.
-- **Throws**: An `Error` if the `apiKey` is not provided, preventing the service from being instantiated in an invalid state.
-
-**Example:**
+The service's constructor will initialize a new instance with the necessary configuration to authenticate with the OpenRouter API.
 
 ```typescript
-// src/lib/ai/openrouter.service.ts
-
-export class OpenRouterService {
+class OpenRouterService {
   private readonly apiKey: string;
-  private readonly baseUrl = 'https://openrouter.ai/api/v1';
+  private readonly baseUrl: string = 'https://openrouter.ai/api/v1';
 
-  constructor(apiKey: string | undefined) {
+  /**
+   * @param apiKey The API key for OpenRouter.
+   * @throws {Error} if the API key is not provided.
+   */
+  constructor(apiKey: string) {
     if (!apiKey) {
       throw new Error('OpenRouter API key is required.');
     }
     this.apiKey = apiKey;
   }
-
-  // ... methods
 }
+```
+
+**Usage:** The service should be instantiated where needed, for example, inside an Astro API route or another service, by retrieving the key from environment variables.
+
+```typescript
+// Example in an Astro API route or service
+import { OpenRouterService } from '@/lib/ai/openrouter.service';
+
+const openRouterApiKey = import.meta.env.OPENROUTER_API_KEY;
+const openRouterService = new OpenRouterService(openRouterApiKey);
 ```
 
 ## 3. Public Methods and Fields
 
-### `async getChatCompletion<T>(options: OpenRouterRequest): Promise<T>`
+The service will expose one primary public method for generating structured content.
 
-This is the primary public method for the service. It sends a chat completion request to the OpenRouter API and returns the structured response.
+### `generateStructuredResponse<T extends z.ZodTypeAny>(options: GenerateOptions<T>): Promise<z.infer<T>>`
 
-- **`options`**: An `OpenRouterRequest` object containing all necessary parameters for the API call.
-- **Returns**: A `Promise` that resolves to the parsed JSON response from the model, typed with the generic `T`.
-- **Throws**: `OpenRouterError` for API-specific errors or standard `Error` for network/validation issues.
+This method sends a request to the OpenRouter API and returns a validated, structured JSON object that conforms to the provided Zod schema.
 
-**Type Definitions:**
+**Parameters (`GenerateOptions<T>`):**
+
+-   `systemMessage` (string): The system prompt to guide the model's behavior.
+-   `userMessage` (string): The user's input or query.
+-   `schema` (T): A Zod schema (`z.object(...)`) that defines the expected structure of the JSON response.
+-   `model` (string, optional): The name of the model to use (e.g., `"anthropic/claude-3.5-sonnet"`). Defaults to a project-wide standard.
+-   `params` (object, optional): Additional model parameters like `temperature`, `max_tokens`, etc.
+
+**Returns:** A `Promise` that resolves to an object of the type inferred from the provided Zod schema.
+
+**Example Usage:**
 
 ```typescript
-// src/lib/ai/openrouter.types.ts
-
 import { z } from 'zod';
 
-export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
+const QuestionsSchema = z.object({
+  questions: z.array(
+    z.object({
+      question: z.string().describe('The generated interview question.'),
+    })
+  ),
+});
 
-export interface JsonSchema {
-  name: string;
-  strict?: boolean;
-  schema: object;
-}
+const response = await openRouterService.generateStructuredResponse({
+  systemMessage: 'You are an expert interviewer. Generate technical questions based on the user\'s input.',
+  userMessage: 'The user has experience with React and PostgreSQL.',
+  schema: QuestionsSchema,
+  model: 'anthropic/claude-3.5-sonnet',
+});
 
-export interface ResponseFormat {
-  type: 'json_schema';
-  json_schema: JsonSchema;
-}
-
-export interface OpenRouterRequest {
-  model: string;
-  messages: ChatMessage[];
-  response_format?: ResponseFormat;
-  temperature?: number;
-  max_tokens?: number;
-  // Add other model parameters as needed
-}
-
-// Example Zod schema for a structured response
-export const GeneratedQuestionsResponseSchema = z.array(z.string().describe('A generated interview question.'));
-
-export type GeneratedQuestionsResponse = z.infer<typeof GeneratedQuestionsResponseSchema>;
+// `response` is now a typesafe object: { questions: [{ question: string }] }
 ```
 
 ## 4. Private Methods and Fields
 
-### `private readonly apiKey: string`
+The service will use private methods to encapsulate implementation details.
 
-Stores the OpenRouter API key.
+### `_buildPayload<T extends z.ZodTypeAny>(options: GenerateOptions<T>): object`
 
-### `private readonly baseUrl: string`
+This private method will be responsible for constructing the final request body to be sent to the OpenRouter API. It will integrate the system message, user message, and the JSON schema for structured output.
 
-Stores the base URL for the OpenRouter API.
+**Functionality:**
 
-### `private validateRequest(options: OpenRouterRequest): void`
+1.  **System Message:** The `systemMessage` will be placed in the `messages` array as the first object with `role: 'system'`.
+2.  **User Message:** The `userMessage` will follow as the second object with `role: 'user'`.
+3.  **Structured Response Format (`response_format`):** The Zod schema will be converted into a JSON schema and embedded in the `response_format` field. This forces the model to return valid JSON.
+    -   The format will be: `{ type: 'json_schema', json_schema: { name: 'structured_response', strict: true, schema: [zod-to-json-schema-output] } }`
+4.  **Model and Parameters:** The `model` name and any additional `params` will be added to the top level of the payload.
 
-A private helper method to validate the request options before sending them to the API. It ensures that required fields like `model` and `messages` are present and correctly formatted.
+### `_fetchWithTimeout(url: string, options: RequestInit, timeout: number): Promise<Response>`
+
+A helper method to make `fetch` requests with a configurable timeout to prevent long-running requests from hanging the application.
 
 ## 5. Error Handling
 
-The service must implement robust error handling to manage various failure scenarios gracefully. All errors originating from this service should be instances of a custom `OpenRouterError` class to allow for specific `catch` blocks.
+The service must implement robust error handling for all foreseeable issues. Errors originating from the service should be instances of custom error classes defined in `src/lib/errors.ts` (e.g., `BadGatewayError`, `InternalServerError`).
 
-### `OpenRouterError`
+**Potential Error Scenarios:**
 
-A custom error class that extends `Error`. It should include the HTTP status code and any error details returned by the API.
-
-```typescript
-// src/lib/errors.ts
-
-export class OpenRouterError extends Error {
-  constructor(
-    public status: number,
-    public errorResponse: object | string,
-    message?: string
-  ) {
-    super(message || `OpenRouter API Error: Status ${status}`);
-    this.name = 'OpenRouterError';
-  }
-}
-```
-
-### Error Scenarios:
-
-1.  **Invalid API Key (401 Unauthorized)**: The service should throw an `OpenRouterError` with status 401.
-2.  **Rate Limit Exceeded (429 Too Many Requests)**: The service should throw an `OpenRouterError` with status 429. This can be caught upstream to implement retry logic with exponential backoff.
-3.  **Invalid Request (400 Bad Request)**: The service should throw an `OpenRouterError` with status 400, including the validation errors from the API response.
-4.  **Server Error (5xx)**: The service should throw an `OpenRouterError` with the corresponding 5xx status code.
-5.  **Network/Fetch Error**: The underlying `fetch` call might fail. This should be caught and re-thrown as a standard `Error` or a specific `NetworkError`.
-6.  **JSON Parsing Error**: If the API response is not valid JSON or the model's output does not conform to the requested schema, the service should throw an error indicating a parsing failure.
+1.  **API Key Missing:** The constructor will throw a standard `Error` if the API key is not provided.
+2.  **Network Errors:** Issues like timeouts or connectivity problems during the `fetch` call. The service should catch these and throw a `BadGatewayError` with a descriptive message.
+3.  **OpenRouter API Errors:** The API may return non-200 status codes (e.g., 401 Unauthorized, 429 Rate Limit Exceeded, 500 Server Error). The service should parse the error response from OpenRouter and wrap it in a `BadGatewayError`.
+4.  **Invalid JSON Response:** The model might fail to produce valid JSON despite the `response_format` instruction. The service should catch the `JSON.parse()` error and throw an `InternalServerError`.
+5.  **Zod Validation Failure:** The model's JSON output may not conform to the provided Zod schema. The service should catch the Zod validation error and throw an `InternalServerError`, logging the validation issues for debugging.
 
 ## 6. Security Considerations
 
--   **API Key Management**: The OpenRouter API key is a sensitive secret. It **must not** be hardcoded in the source code. It should be loaded from environment variables (`import.meta.env.OPENROUTER_API_KEY`) on the server side.
--   **Input Sanitization**: While the primary inputs are controlled internally, any user-provided content that is passed into the `messages` array should be sanitized to prevent prompt injection attacks if applicable to the use case.
--   **Resource Limits**: Use model parameters like `max_tokens` to prevent unexpectedly large (and costly) responses.
+1.  **API Key Management:** The `OPENROUTER_API_KEY` must be stored securely as an environment variable and should never be hardcoded or exposed to the client-side. Use Astro's `import.meta.env` for server-side access.
+2.  **Input Sanitization:** While the service itself doesn't perform sanitization, the calling context (e.g., the API route) should ensure that user-provided input is validated before being passed to the `generateStructuredResponse` method to prevent prompt injection attacks.
+3.  **Denial of Service (DoS):** Implement rate limiting on the API endpoints that use this service to prevent abuse. Astro middleware is a suitable place for this. Also, set a reasonable timeout for API requests to avoid tying up server resources.
 
 ## 7. Step-by-Step Implementation Plan
 
-### Step 1: Create New Files
+**File Location:** `src/lib/ai/openrouter.service.ts`
 
-Create the following new files in the `src/lib/ai/` directory:
+**Step 1: Install Dependencies**
 
--   `src/lib/ai/openrouter.service.ts`
--   `src/lib/ai/openrouter.types.ts`
+Install the `zod-to-json-schema` library to convert Zod schemas into the JSON Schema format required by the OpenRouter API. This is crucial for enforcing structured responses from the LLM.
 
-### Step 2: Define Types and Schemas
+**Step 2: Create the Service File and Class Skeleton**
 
-In `src/lib/ai/openrouter.types.ts`, define the interfaces and Zod schemas for requests and structured responses.
+Create the file `src/lib/ai/openrouter.service.ts`. Define the `OpenRouterService` class structure, including its constructor for API key injection and the public-facing `generateStructuredResponse` method. Also, define the `GenerateOptions` interface for type safety.
 
-```typescript
-// src/lib/ai/openrouter.types.ts
+**Step 3: Implement the Private `_buildPayload` Method**
 
-import { z } from 'zod';
+Implement a private method to construct the request body sent to the OpenRouter API. This method will be responsible for assembling the system message, user message, model parameters, and, most importantly, converting the Zod schema into the `response_format` JSON schema required by the API.
 
-// Interfaces for API interaction
-export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
+**Step 4: Implement the `generateStructuredResponse` Method**
 
-export interface JsonSchema {
-  name: string;
-  strict?: boolean;
-  schema: object;
-}
+Flesh out the main public method. This involves calling the private `_buildPayload` method, making the `fetch` request to the OpenRouter `/chat/completions` endpoint, and handling the full lifecycle of the response. This includes parsing the response body, extracting the JSON content from the message, and validating it against the provided Zod schema. Robust error handling for API failures, network issues, and validation errors is critical here.
 
-export interface ResponseFormat {
-  type: 'json_schema';
-  json_schema: JsonSchema;
-}
+**Step 5: Integrate the Service into `generation.service.ts`**
 
-export interface OpenRouterRequest {
-  model: string;
-  messages: ChatMessage[];
-  response_format?: ResponseFormat;
-  temperature?: number;
-  max_tokens?: number;
-}
-
-// Example Zod schema for a structured response
-export const GeneratedQuestionsResponseSchema = z.array(z.string().describe('A generated interview question.'));
-
-export type GeneratedQuestionsResponse = z.infer<typeof GeneratedQuestionsResponseSchema>;
-```
-
-### Step 3: Implement the `OpenRouterService` Class
-
-In `src/lib/ai/openrouter.service.ts`, implement the service class.
-
-```typescript
-// src/lib/ai/openrouter.service.ts
-
-import { OpenRouterError } from '../errors';
-import type { OpenRouterRequest } from './openrouter.types';
-
-export class OpenRouterService {
-  private readonly apiKey: string;
-  private readonly baseUrl = 'https://openrouter.ai/api/v1';
-
-  constructor(apiKey: string | undefined) {
-    if (!apiKey) {
-      // This will be caught server-side and should result in a 500 error.
-      throw new Error('OpenRouter API key is not configured.');
-    }
-    this.apiKey = apiKey;
-  }
-
-  public async getChatCompletion<T>(options: OpenRouterRequest): Promise<T> {
-    this.validateRequest(options);
-
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`,
-      },
-      body: JSON.stringify(options),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => response.text());
-      throw new OpenRouterError(response.status, errorData);
-    }
-
-    const data = await response.json();
-
-    try {
-      // The actual content from the model is in a stringified JSON inside the 'content' field
-      const content = data.choices[0]?.message?.content;
-      if (!content) {
-        throw new Error('No content in OpenRouter response.');
-      }
-      return JSON.parse(content) as T;
-    } catch (error) {
-      throw new Error(`Failed to parse structured response from model: ${error instanceof Error ? error.message : 'Unknown parsing error'}`);
-    }
-  }
-
-  private validateRequest(options: OpenRouterRequest): void {
-    if (!options.model) {
-      throw new Error('Model is required.');
-    }
-    if (!options.messages || options.messages.length === 0) {
-      throw new Error('Messages are required.');
-    }
-  }
-}
-```
-
-### Step 4: Update Error Handling
-
-Ensure the custom `OpenRouterError` is defined in `src/lib/errors.ts`.
-
-```typescript
-// src/lib/errors.ts
-
-// ... any existing errors
-
-export class OpenRouterError extends Error {
-  constructor(
-    public status: number,
-    public errorResponse: object | string,
-    message?: string
-  ) {
-    const defaultMessage = `OpenRouter API Error: Status ${status}. Response: ${JSON.stringify(errorResponse)}`;
-    super(message || defaultMessage);
-    this.name = 'OpenRouterError';
-  }
-}
-```
-
-### Step 5: Example Usage in an API Route
-
-Modify an existing or create a new API route (e.g., `src/pages/api/ai/generate-questions.ts`) to use the new service.
-
-```typescript
-// src/pages/api/ai/generate-questions.ts
-
-import type { APIRoute } from 'astro';
-import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import { OpenRouterService } from '../../../lib/ai/openrouter.service';
-import { GeneratedQuestionsResponseSchema, type ChatMessage } from '../../../lib/ai/openrouter.types';
-import { OpenRouterError } from '../../../lib/errors';
-
-// Input validation schema
-const RequestBodySchema = z.object({
-  job_title: z.string(),
-  job_description: z.string(),
-});
-
-export const POST: APIRoute = async ({ request }) => {
-  // 1. Validate Input
-  const body = await request.json();
-  const validation = RequestBodySchema.safeParse(body);
-
-  if (!validation.success) {
-    return new Response(JSON.stringify({ error: 'Invalid input', details: validation.error.flatten() }), { status: 400 });
-  }
-
-  const { job_title, job_description } = validation.data;
-
-  // 2. Configure OpenRouter Request
-  const systemMessage: ChatMessage = {
-    role: 'system',
-    content: 'You are an expert interviewer. Generate 5 technical interview questions based on the provided job title and description. Return the questions as a JSON array of strings.',
-  };
-
-  const userMessage: ChatMessage = {
-    role: 'user',
-    content: `Job Title: ${job_title}\nJob Description: ${job_description}`,
-  };
-
-  // Convert Zod schema to JSON schema for the model
-  const jsonSchema = zodToJsonSchema(GeneratedQuestionsResponseSchema, 'GeneratedQuestions');
-
-  // 3. Initialize and Use the Service
-  try {
-    const openRouter = new OpenRouterService(import.meta.env.OPENROUTER_API_KEY);
-
-    const questionsResponse = await openRouter.getChatCompletion({
-      model: 'anthropic/claude-3.5-sonnet', // Example model
-      messages: [systemMessage, userMessage],
-      temperature: 0.5,
-      max_tokens: 2048,
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
-          name: 'GeneratedQuestions',
-          strict: true,
-          schema: jsonSchema,
-        },
-      },
-    });
-
-    // 4. Validate the model's output against our Zod schema
-    const parsedOutput = GeneratedQuestionsResponseSchema.safeParse(questionsResponse);
-
-    if (!parsedOutput.success) {
-        // This indicates the model failed to follow instructions
-        return new Response(JSON.stringify({ error: 'Failed to get a valid response from the model.', details: parsedOutput.error.flatten() }), { status: 500 });
-    }
-
-    return new Response(JSON.stringify(parsedOutput.data), { status: 200 });
-
-  } catch (error) {
-    console.error(error);
-    if (error instanceof OpenRouterError) {
-      return new Response(JSON.stringify({ error: 'Error from AI service.', details: error.errorResponse }), { status: error.status });
-    }
-    return new Response(JSON.stringify({ error: 'An internal server error occurred.' }), { status: 500 });
-  }
-};
-```
-This plan provides a clear path to creating a robust, secure, and maintainable service for interacting with the OpenRouter API, tailored to the project's existing tech stack and coding practices.
+Refactor the `generation.service.ts` file to replace the mocked AI implementation. Instantiate the `OpenRouterService` with the API key from environment variables. Call the `generateStructuredResponse` method with the appropriate system prompt, user input (source text), and the `QuestionsSchema` to get real AI-generated questions. Ensure the response and any potential errors are handled correctly within the existing logging and error-handling structure.
