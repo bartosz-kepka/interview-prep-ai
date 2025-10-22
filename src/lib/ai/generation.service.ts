@@ -1,10 +1,23 @@
 import type { SupabaseClient } from '@/db/supabase.client.ts';
 import type { TablesInsert } from '@/db/database.types.ts';
 import { BadGatewayError, InternalServerError } from '../errors';
+import { OpenRouterService } from './openrouter.service';
+import { z } from 'zod';
+
+/**
+ * Zod schema for the AI-generated questions response.
+ */
+const QuestionsSchema = z.object({
+  questions: z.array(
+    z.object({
+      question: z.string().describe('The generated interview question.'),
+    })
+  ),
+});
 
 /**
  * Generates interview questions from the provided source text using an AI service.
- * This function handles logging the generation process and mocking the AI response for development.
+ * This function handles logging the generation process and calling the OpenRouter AI service.
  */
 export const generateQuestions = async (
   source_text: string,
@@ -32,23 +45,26 @@ export const generateQuestions = async (
   const generation_log_id = logData.id;
 
   try {
-    // Step 2: Call AI - Mocked for development purposes
-    // In production, this would make an actual API call to OpenRouter.
-    // For now, simulate a successful AI response with sample questions.
-    const mockAiResponse = {
-      questions: [
-        { question: 'Can you describe your experience with React and Node.js?' },
-        { question: 'Tell us about a project where you used PostgreSQL.' },
-        { question: 'How do you handle state management in large-scale applications?' },
-      ],
-    };
+    // Step 2: Call AI using OpenRouterService
+    const openRouterApiKey = import.meta.env.OPENROUTER_API_KEY;
+    if (!openRouterApiKey) {
+      throw new InternalServerError('OpenRouter API key is not configured');
+    }
+
+    const openRouterService = new OpenRouterService(openRouterApiKey);
+
+    const aiResponse = await openRouterService.generateStructuredResponse({
+      systemMessage: 'You are an expert interviewer. Generate technical questions based on the user\'s input.',
+      userMessage: source_text,
+      schema: QuestionsSchema,
+    });
 
     // Step 3: Handle Response - Success
     // Update the log record with success status, finished_at timestamp, and the raw response.
     const logUpdate = {
       status: 'success' as const,
       finished_at: new Date().toISOString(),
-      response: JSON.stringify(mockAiResponse),
+      response: JSON.stringify(aiResponse),
     };
 
     const { error: updateError } = await supabase
@@ -63,7 +79,7 @@ export const generateQuestions = async (
     // Return the parsed question proposals and the log ID.
     return {
       generation_log_id,
-      question_proposals: mockAiResponse.questions,
+      question_proposals: aiResponse.questions,
     };
   } catch (aiError) {
     // Step 3: Handle Response - Failure
