@@ -28,7 +28,7 @@ Wprowadzone zostaną nowe, publicznie dostępne strony w katalogu `src/pages/`:
 
 #### 2.2. Nowe Komponenty (React)
 
-Interaktywne formularze zostaną zaimplementowane jako komponenty React, aby zarządzać stanem, walidacją i komunikacją z API po stronie klienta.
+Interaktywne formularze zostaną zaimplementowane jako komponenty React, aby zarządzać stanem, walidacją i komunikacją z API po stronie klienta. Zostaną umieszczone w nowym katalogu `src/components/auth/`.
 
 - **`src/components/auth/LoginForm.tsx`**: Formularz logowania z polami na e-mail i hasło. Będzie wykorzystywał schemat walidacji Zod. Komponent będzie renderowany na stronie `login.astro`.
 - **`src/components/auth/SignUpForm.tsx`**: Formularz rejestracji z polami na e-mail i hasło. Analogicznie do `LoginForm`, będzie używał walidacji Zod do sprawdzania formatu e-maila i minimalnej długości hasła. Renderowany na stronie `signup.astro`.
@@ -59,16 +59,20 @@ Zgodnie z praktykami Astro, endpointy API zostaną umieszczone w `src/pages/api/
 - **`src/pages/api/auth/login.ts`**:
   - Metoda: `POST`
   - Ciało żądania: `{ email, password }`
-  - Logika: Waliduje dane wejściowe za pomocą Zod. Wywołuje `supabase.auth.signInWithPassword()`. W przypadku sukcesu, ustawia ciasteczka sesji za pomocą `Astro.cookies.set()` i zwraca dane użytkownika. W przypadku błędu, zwraca odpowiedni status HTTP (np. 401) i komunikat błędu.
+  - Logika: Waliduje dane wejściowe za pomocą Zod. Wywołuje `supabase.auth.signInWithPassword()`. **Sprawdza, czy e-mail użytkownika został zweryfikowany (`user.email_confirmed_at`). Jeśli nie, zwraca błąd 401 z informacją o konieczności weryfikacji.** W przypadku sukcesu, ustawia ciasteczka sesji za pomocą `Astro.cookies.set()` i zwraca dane użytkownika. W przypadku błędu, zwraca odpowiedni status HTTP i komunikat błędu.
 
 - **`src/pages/api/auth/signup.ts`**:
   - Metoda: `POST`
   - Ciało żądania: `{ email, password }`
-  - Logika: Waliduje dane. Wywołuje `supabase.auth.signUp()`, podając URL do `/callback` jako `emailRedirectTo`. Supabase automatycznie wyśle e-mail weryfikacyjny. Zwraca sukces (np. 201 Created).
+  - Logika: Waliduje dane. Wywołuje `supabase.auth.signUp()`, podając URL do `/api/auth/callback` jako `emailRedirectTo`. Supabase automatycznie wyśle e-mail weryfikacyjny. Zwraca sukces (np. 201 Created).
 
 - **`src/pages/api/auth/logout.ts`**:
   - Metoda: `POST`
   - Logika: Wywołuje `supabase.auth.signOut()`. Czyści ciasteczka sesji za pomocą `Astro.cookies.delete()` i zwraca sukces.
+
+- **`src/pages/api/auth/callback.ts`**:
+  - Metoda: `GET`
+  - Logika: Endpoint serwerowy, który Supabase wywoła po kliknięciu linku weryfikacyjnego. Wymienia kod autoryzacyjny na sesję za pomocą `supabase.auth.exchangeCodeForSession()`. Jeśli operacja się powiedzie, ustawia ciasteczka sesji i przekierowuje użytkownika do głównego widoku aplikacji (np. `/generator`). W przypadku błędu (np. wygasły link), przekierowuje na stronę `/error/expired-link`.
 
 - **`src/pages/api/auth/reset-password.ts`**:
   - Metoda: `POST`
@@ -109,7 +113,7 @@ Kluczowym elementem systemu będzie middleware Astro, który będzie chronił tr
 #### 4.2. Konfiguracja Supabase
 
 - **Klient Supabase**: Istniejący klient w `src/db/supabase.client.ts` będzie używany zarówno na serwerze (w middleware i API), jak i po stronie klienta (w komponentach React). Należy upewnić się, że jest on skonfigurowany jako singleton.
-- **Szablony e-mail**: W panelu Supabase zostaną skonfigurowane szablony e-mail dla weryfikacji konta i resetowania hasła, aby zawierały poprawne linki zwrotne do aplikacji (np. `https://twoja-domena.com/callback` i `https://twoja-domena.com/reset-password`).
+- **Szablony e-mail**: W panelu Supabase zostaną skonfigurowane szablony e-mail dla weryfikacji konta i resetowania hasła, aby zawierały poprawne linki zwrotne do aplikacji (np. `https://twoja-domena.com/api/auth/callback` i `https://twoja-domena.com/reset-password`).
 - **URL-e przekierowań**: W ustawieniach Supabase Auth należy dodać adres URL aplikacji do listy dozwolonych przekierowań.
 
 #### 4.3. Przepływ Danych (Podsumowanie)
@@ -128,5 +132,5 @@ Kluczowym elementem systemu będzie middleware Astro, który będzie chronił tr
 2.  Dane są wysyłane do `/api/auth/signup`.
 3.  API wywołuje `supabase.auth.signUp()`. Supabase wysyła e-mail weryfikacyjny.
 4.  Frontend po otrzymaniu odpowiedzi 201 przekierowuje użytkownika na stronę `/check-email`.
-5.  Użytkownik klika link w e-mailu, który prowadzi do strony `/callback`.
-6.  Strona `/callback` po stronie serwera obsługuje sesję, a następnie przekierowuje użytkownika na `/login` z komunikatem o pomyślnej weryfikacji.
+5.  Użytkownik klika link w e-mailu, który prowadzi do endpointu `/api/auth/callback`.
+6.  Endpoint `/api/auth/callback` po stronie serwera wymienia kod na sesję, ustawia ciasteczka i przekierowuje uwierzytelnionego użytkownika do głównego widoku aplikacji (np. `/generator`). W przypadku błędu (wygasły link), użytkownik jest przekierowywany na stronę błędu.
