@@ -1,157 +1,132 @@
-# Specyfikacja Techniczna: Moduł Uwierzytelniania
+### Specyfikacja Techniczna: Moduł Autentykacji Użytkowników
 
-Data: 23.10.2025
-Wersja: 1.0
+**Wersja:** 1.0
+**Data:** 24.10.2025
+**Autor:** GitHub Copilot
 
-## 1. Wprowadzenie
+---
 
-Niniejszy dokument opisuje architekturę techniczną modułu uwierzytelniania dla aplikacji InterviewPrep AI. Specyfikacja bazuje na wymaganiach zdefiniowanych w PRD (US-001 do US-005) oraz na przyjętym stosie technologicznym (Astro, React, Supabase). Celem jest zaprojektowanie spójnego i bezpiecznego systemu rejestracji, logowania, wylogowywania i odzyskiwania hasła.
+### 1. Przegląd
 
-## 2. Architektura Interfejsu Użytkownika (UI)
+Niniejszy dokument opisuje architekturę i implementację modułu autentykacji (rejestracja, logowanie, wylogowanie, odzyskiwanie hasła) dla aplikacji InterviewPrep AI. Specyfikacja jest zgodna z wymaganiami funkcjonalnymi (US-001 do US-005) zdefiniowanymi w PRD oraz opiera się na ustalonym stacku technologicznym (Astro, React, Supabase, Zod).
 
-Interfejs użytkownika zostanie rozbudowany o nowe strony i komponenty dedykowane obsłudze procesów uwierzytelniania. Zostaną one zintegrowane z istniejącą strukturą aplikacji, z wyraźnym podziałem odpowiedzialności między statyczne strony Astro a interaktywne komponenty React.
+Celem jest stworzenie bezpiecznego, wydajnego i skalowalnego rozwiązania, które integruje się z istniejącą strukturą aplikacji, wykorzystując renderowanie po stronie serwera (SSR) w Astro oraz interaktywne komponenty React.
 
-### 2.1. Nowe Strony (Astro Pages)
+### 2. Architektura Interfejsu Użytkownika (Frontend)
 
-W katalogu `src/pages/` powstanie nowy folder `auth/`, w którym znajdą się strony odpowiedzialne za poszczególne widoki procesu uwierzytelniania.
+#### 2.1. Nowe Strony (Astro)
 
-- **`src/pages/auth/login.astro`**: Strona logowania.
-    - **Cel**: Wyświetlenie formularza logowania.
-    - **Dostęp**: Dla użytkowników niezalogowanych. Użytkownicy zalogowani będą automatycznie przekierowywani na stronę główną (`/`).
-    - **Zawartość**: Będzie renderować komponent React `LoginForm.tsx`.
+Wprowadzone zostaną nowe, publicznie dostępne strony w katalogu `src/pages/`:
 
-- **`src/pages/auth/register.astro`**: Strona rejestracji.
-    - **Cel**: Wyświetlenie formularza rejestracji.
-    - **Dostęp**: Dla użytkowników niezalogowanych. Użytkownicy zalogowani będą automatycznie przekierowywani na stronę główną (`/`).
-    - **Zawartość**: Będzie renderować komponent React `RegisterForm.tsx`.
+- **`src/pages/login.astro`**: Strona logowania (ścieżka: `/login`).
+- **`src/pages/signup.astro`**: Strona rejestracji (ścieżka: `/signup`).
+- **`src/pages/forgot-password.astro`**: Strona do inicjowania procesu resetowania hasła (ścieżka: `/forgot-password`).
+- **`src/pages/reset-password.astro`**: Strona, na którą użytkownik jest przekierowywany z linku w mailu, aby ustawić nowe hasło (ścieżka: `/reset-password`).
+- **`src/pages/check-email.astro`**: Strona informująca o wysłaniu maila weryfikacyjnego (ścieżka: `/check-email`).
+- **`src/pages/error/expired-link.astro`**: Strona błędu dla wygasłego linku (ścieżka: `/error/expired-link`).
+- **`src/pages/callback.astro`**: Strona techniczna (server-side) do obsługi przekierowań zwrotnych od Supabase (np. po weryfikacji e-mail). Przetwarza sesję i przekierowuje użytkownika na stronę logowania z odpowiednim komunikatem.
 
-- **`src/pages/auth/password-reset.astro`**: Strona do resetowania hasła.
-    - **Cel**: Wyświetlenie formularza do zainicjowania procesu resetowania hasła (podanie adresu e-mail) oraz formularza do ustawienia nowego hasła (po przejściu z linku w mailu).
-    - **Dostęp**: Dla użytkowników niezalogowanych.
-    - **Zawartość**: Będzie renderować komponent React `PasswordResetForm.tsx`.
+#### 2.2. Nowe Komponenty (React)
 
-- **`src/pages/auth/callback.astro`**: Strona do obsługi callbacków z Supabase.
-    - **Cel**: Strona techniczna, niewidoczna dla użytkownika. Obsłuży przekierowania zwrotne od Supabase po pomyślnej weryfikacji e-maila lub resecie hasła.
-    - **Logika**: Endpoint po stronie serwera (GET), który obsłuży sesję i przekieruje użytkownika na stronę logowania z odpowiednim komunikatem (np. "Konto zweryfikowane, możesz się zalogować").
+Interaktywne formularze zostaną zaimplementowane jako komponenty React, aby zarządzać stanem, walidacją i komunikacją z API po stronie klienta.
 
-### 2.2. Nowe Komponenty (React Components)
+- **`src/components/auth/LoginForm.tsx`**: Formularz logowania z polami na e-mail i hasło. Będzie wykorzystywał schemat walidacji Zod. Komponent będzie renderowany na stronie `login.astro`.
+- **`src/components/auth/SignUpForm.tsx`**: Formularz rejestracji z polami na e-mail i hasło. Analogicznie do `LoginForm`, będzie używał walidacji Zod do sprawdzania formatu e-maila i minimalnej długości hasła. Renderowany na stronie `signup.astro`.
+- **`src/components/auth/ForgotPasswordForm.tsx`**: Prosty formularz z polem na e-mail, używany na stronie `forgot-password.astro`.
+- **`src/components/auth/ResetPasswordForm.tsx`**: Formularz z polem na nowe hasło, renderowany na stronie `reset-password.astro`.
 
-W katalogu `src/components/` powstanie nowy folder `auth/`, w którym znajdą się interaktywne komponenty formularzy.
+Komponenty te będą korzystać z komponentów UI z `shadcn/ui` (np. `Input`, `Button`, `Card`, `Alert`) w celu zachowania spójności wizualnej.
 
-- **`src/components/auth/LoginForm.tsx`**:
-    - **Odpowiedzialność**: Zarządzanie stanem formularza logowania (dane wejściowe, stan ładowania, komunikaty o błędach).
-    - **Walidacja**: Walidacja po stronie klienta przy użyciu `zod` (sprawdzenie formatu e-mail, niepuste hasło).
-    - **Interakcja**: Po wysłaniu formularza, komponent będzie komunikował się z endpointem API (`/api/auth/login`) w celu uwierzytelnienia użytkownika. Po pomyślnym logowaniu, nastąpi odświeżenie strony i przekierowanie zarządzane przez Astro.
+#### 2.3. Modyfikacja Layoutów i Komponentów
 
-- **`src/components/auth/RegisterForm.tsx`**:
-    - **Odpowiedzialność**: Zarządzanie stanem formularza rejestracji.
-    - **Walidacja**: Walidacja `zod` (format e-mail, minimalna długość hasła - 8 znaków).
-    - **Interakcja**: Komunikacja z endpointem API (`/api/auth/register`). Po pomyślnej rejestracji, formularz zostanie ukryty, a w jego miejsce pojawi się komunikat informujący o konieczności weryfikacji adresu e-mail.
+- **`src/layouts/Layout.astro`**: Główny layout zostanie zmodyfikowany, aby warunkowo renderować elementy interfejsu w zależności od statusu zalogowania użytkownika. Informacja o sesji będzie dostępna poprzez `Astro.locals.session`.
+  - **Tryb `non-auth`**: Wyświetla linki "Zaloguj się" i "Zarejestruj się".
+  - **Tryb `auth`**: Wyświetla nazwę użytkownika (lub e-mail) oraz przycisk "Wyloguj".
 
-- **`src/components/auth/PasswordResetForm.tsx`**:
-    - **Odpowiedzialność**: Zarządzanie stanem formularza resetowania hasła.
-    - **Interakcja**: Komunikacja z endpointem API (`/api/auth/password-reset`).
+- **`src/components/auth/LogoutButton.tsx`**: Prosty komponent React, który po kliknięciu będzie wywoływał endpoint API do wylogowania.
 
-### 2.3. Modyfikacje Istniejących Elementów
+#### 2.4. Walidacja i Obsługa Błędów
 
-- **`src/layouts/Layout.astro`**:
-    - **Cel**: Wprowadzenie logiki warunkowego renderowania elementów nawigacji w zależności od stanu zalogowania użytkownika.
-    - **Logika**: Layout będzie sprawdzał obecność sesji użytkownika w `Astro.locals.session`.
-        - **Jeśli użytkownik jest zalogowany**: Wyświetli linki "Moje pytania" (`/questions`) i "Wyloguj" (przycisk uruchamiający endpoint `/api/auth/logout`).
-        - **Jeśli użytkownik jest niezalogowany**: Wyświetli linki "Zaloguj" (`/auth/login`) i "Zarejestruj" (`/auth/register`).
+- **Walidacja po stronie klienta**: Każdy formularz React będzie używał biblioteki Zod do natychmiastowej walidacji danych wprowadzanych przez użytkownika (np. format e-mail, długość hasła), wyświetlając komunikaty bezpośrednio pod polami formularza.
+- **Komunikaty z serwera**: Błędy zwrócone z API (np. "Użytkownik o tym adresie e-mail już istnieje", "Nieprawidłowe hasło") będą przechwytywane w komponentach React i wyświetlane użytkownikowi w dedykowanym komponencie `Alert` z `shadcn/ui`.
+
+### 3. Logika Backendowa
+
+#### 3.1. Endpointy API (Astro)
+
+Zgodnie z praktykami Astro, endpointy API zostaną umieszczone w `src/pages/api/auth/`. Będą one pełniły rolę pośrednika (proxy) między klientem a Supabase Auth, co pozwoli na bezpieczne zarządzanie sesją po stronie serwera.
+
+- **`src/pages/api/auth/login.ts`**:
+  - Metoda: `POST`
+  - Ciało żądania: `{ email, password }`
+  - Logika: Waliduje dane wejściowe za pomocą Zod. Wywołuje `supabase.auth.signInWithPassword()`. W przypadku sukcesu, ustawia ciasteczka sesji za pomocą `Astro.cookies.set()` i zwraca dane użytkownika. W przypadku błędu, zwraca odpowiedni status HTTP (np. 401) i komunikat błędu.
+
+- **`src/pages/api/auth/signup.ts`**:
+  - Metoda: `POST`
+  - Ciało żądania: `{ email, password }`
+  - Logika: Waliduje dane. Wywołuje `supabase.auth.signUp()`, podając URL do `/callback` jako `emailRedirectTo`. Supabase automatycznie wyśle e-mail weryfikacyjny. Zwraca sukces (np. 201 Created).
+
+- **`src/pages/api/auth/logout.ts`**:
+  - Metoda: `POST`
+  - Logika: Wywołuje `supabase.auth.signOut()`. Czyści ciasteczka sesji za pomocą `Astro.cookies.delete()` i zwraca sukces.
+
+- **`src/pages/api/auth/reset-password.ts`**:
+  - Metoda: `POST`
+  - Ciało żądania: `{ email }`
+  - Logika: Wywołuje `supabase.auth.resetPasswordForEmail()`, podając URL do strony `reset-password.astro` jako `redirectTo`.
+
+- **`src/pages/api/auth/update-password.ts`**:
+  - Metoda: `POST`
+  - Ciało żądania: `{ password }`
+  - Logika: Wywołuje `supabase.auth.updateUser()` w celu ustawienia nowego hasła. Wymaga aktywnej sesji użytkownika (uzyskanej po kliknięciu linku resetującego).
+
+#### 3.2. Walidacja Danych (Zod)
+
+Dla każdego endpointu API zostaną zdefiniowane schematy Zod w celu walidacji danych przychodzących. Zapewni to spójność i bezpieczeństwo. Schematy te mogą być współdzielone z frontendem.
+
+- `LoginSchema`: `{ email: z.string().email(), password: z.string() }`
+- `SignUpSchema`: `{ email: z.string().email(), password: z.string().min(8) }`
+
+#### 3.3. Renderowanie Server-Side
+
+Wszystkie strony wymagające autoryzacji (np. `generator.astro`, `index.astro` po zalogowaniu) muszą być renderowane po stronie serwera. W pliku `astro.config.mjs` należy upewnić się, że `output` jest ustawiony na `server` lub `hybrid`. Dla stron chronionych, które mają być dynamiczne, należy dodać `export const prerender = false;`.
+
+### 4. System Autentykacji (Integracja z Supabase)
+
+#### 4.1. Middleware
+
+Kluczowym elementem systemu będzie middleware Astro, który będzie chronił trasy i zarządzał sesją.
 
 - **`src/middleware/index.ts`**:
-    - **Cel**: Rozbudowa middleware o logikę zarządzania sesją Supabase.
-    - **Logika**: Middleware będzie przechwytywać każde żądanie, weryfikować token JWT z ciasteczek, a następnie odświeżać sesję i umieszczać dane użytkownika oraz klienta Supabase w `Astro.locals`. To centralny punkt integracji z Supabase Auth po stronie serwera. Zapewni to dostęp do sesji na każdej stronie renderowanej po stronie serwera.
+  - Na początku każdego żądania, middleware będzie próbował odczytać token dostępowy i odświeżający z ciasteczek (`Astro.cookies`).
+  - Wywoła `supabase.auth.setSession()` z odczytanymi tokenami.
+  - Następnie pobierze aktualną sesję za pomocą `supabase.auth.getSession()`.
+  - Jeśli sesja jest ważna, dane użytkownika i sesji zostaną zapisane w `Astro.locals`, aby były dostępne w komponentach Astro i endpointach API (`context.locals.user`, `context.locals.session`).
+  - Jeśli sesja wygasła, ale istnieje token odświeżający, middleware spróbuje ją odświeżyć. Zaktualizowane tokeny zostaną zapisane w ciasteczkach.
+  - **Ochrona tras**: Middleware sprawdzi, czy żądany URL pasuje do chronionych ścieżek (np. `/generator`, `/api/ai/*`). Jeśli użytkownik nie jest zalogowany (`Astro.locals.session` jest `null`), zostanie przekierowany na stronę logowania za pomocą `return Astro.redirect('/login')`.
+  - Strony publiczne (np. `/login`, `/signup`, `/forgot-password`, `/reset-password`, `/check-email`, `/error/*`, strona główna dla niezalogowanych) będą wykluczone z tej logiki przekierowania.
 
-### 2.4. Scenariusze i Obsługa Błędów
+#### 4.2. Konfiguracja Supabase
 
-- **Walidacja**: Wszystkie formularze będą wykorzystywać bibliotekę `zod` do walidacji po stronie klienta (natychmiastowy feedback dla użytkownika) oraz po stronie serwera (zabezpieczenie endpointów API).
-- **Komunikaty o błędach**:
-    - Błędy walidacji będą wyświetlane pod odpowiednimi polami formularza.
-    - Błędy serwera (np. "Użytkownik o tym adresie e-mail już istnieje", "Nieprawidłowe hasło") będą wyświetlane jako ogólny komunikat w komponencie formularza.
-- **Stany ładowania**: Przyciski "Zaloguj", "Zarejestruj" będą blokowane na czas komunikacji z API, a użytkownik zobaczy wskaźnik ładowania (spinner).
+- **Klient Supabase**: Istniejący klient w `src/db/supabase.client.ts` będzie używany zarówno na serwerze (w middleware i API), jak i po stronie klienta (w komponentach React). Należy upewnić się, że jest on skonfigurowany jako singleton.
+- **Szablony e-mail**: W panelu Supabase zostaną skonfigurowane szablony e-mail dla weryfikacji konta i resetowania hasła, aby zawierały poprawne linki zwrotne do aplikacji (np. `https://twoja-domena.com/callback` i `https://twoja-domena.com/reset-password`).
+- **URL-e przekierowań**: W ustawieniach Supabase Auth należy dodać adres URL aplikacji do listy dozwolonych przekierowań.
 
-## 3. Logika Backendu
+#### 4.3. Przepływ Danych (Podsumowanie)
 
-Backend zostanie zrealizowany w formie endpointów API w Astro, które będą hermetyzować logikę komunikacji z Supabase Auth.
+1.  Użytkownik wchodzi na stronę chronioną.
+2.  Middleware Astro przechwytuje żądanie, stwierdza brak sesji i przekierowuje na `/login` za pomocą `Astro.redirect('/login')`.
+3.  Strona `login.astro` renderuje komponent `LoginForm.tsx`.
+4.  Użytkownik wypełnia formularz. Dane są wysyłane do endpointu `/api/auth/login`.
+5.  Endpoint komunikuje się z Supabase, a w razie sukcesu ustawia ciasteczka sesji i odsyła odpowiedź.
+6.  Komponent React po otrzymaniu pozytywnej odpowiedzi przekierowuje użytkownika (np. za pomocą `window.location.href = '/generator'`) na docelową stronę.
+7.  Middleware ponownie przechwytuje żądanie, tym razem odczytuje sesję z ciasteczek, zapisuje ją w `Astro.locals` i zezwala na dostęp do strony.
 
-### 3.1. Struktura Endpointów API
+##### Przepływ Rejestracji
 
-W katalogu `src/pages/api/` powstanie nowy folder `auth/`. Wszystkie endpointy będą miały ustawioną flagę `export const prerender = false;`.
-
-- **`POST /api/auth/login`**:
-    - **Przeznaczenie**: Logowanie użytkownika.
-    - **Dane wejściowe**: `{ email: string, password: string }`.
-    - **Logika**:
-        1. Walidacja danych wejściowych przy użyciu `zod`.
-        2. Wywołanie metody `supabase.auth.signInWithPassword()`.
-        3. W przypadku sukcesu, Supabase automatycznie ustawi ciasteczka sesji w odpowiedzi. Endpoint zwróci status 200 OK.
-        4. W przypadku błędu (np. nieprawidłowe dane, konto niezweryfikowane), zwróci odpowiedni status HTTP (np. 400, 401) wraz z komunikatem błędu.
-
-- **`POST /api/auth/register`**:
-    - **Przeznaczenie**: Rejestracja nowego użytkownika.
-    - **Dane wejściowe**: `{ email: string, password: string }`.
-    - **Logika**:
-        1. Walidacja danych wejściowych (`zod`).
-        2. Wywołanie metody `supabase.auth.signUp()`, przekazując URL do callbacka weryfikacyjnego (`/auth/callback`).
-        3. W przypadku błędu (np. użytkownik już istnieje), zwróci status 409 Conflict.
-        4. W przypadku sukcesu, zwróci status 201 Created.
-
-- **`POST /api/auth/logout`**:
-    - **Przeznaczenie**: Wylogowanie użytkownika.
-    - **Logika**:
-        1. Wywołanie metody `supabase.auth.signOut()`.
-        2. Usunięcie ciasteczek sesji.
-        3. Przekierowanie użytkownika na stronę główną (`/`).
-
-- **`POST /api/auth/password-reset`**:
-    - **Przeznaczenie**: Inicjowanie procesu resetowania hasła.
-    - **Dane wejściowe**: `{ email: string }`.
-    - **Logika**:
-        1. Walidacja danych wejściowych.
-        2. Wywołanie metody `supabase.auth.resetPasswordForEmail()`, przekazując URL do strony ustawiania nowego hasła.
-        3. Zawsze zwraca status 200 OK, aby nie ujawniać, czy dany e-mail istnieje w bazie.
-
-- **`POST /api/auth/password-update`**:
-    - **Przeznaczenie**: Aktualizacja hasła użytkownika.
-    - **Dane wejściowe**: `{ password: string }`.
-    - **Logika**:
-        1. Endpoint wywoływany z sesją użytkownika (po przejściu z linku resetującego).
-        2. Walidacja nowego hasła.
-        3. Wywołanie metody `supabase.auth.updateUser()`.
-        4. Zwrócenie statusu 200 OK lub błędu.
-
-### 3.2. Walidacja i Obsługa Wyjątków
-
-- **Walidacja**: Każdy endpoint API będzie rozpoczynał się od bloku walidacji danych wejściowych przy użyciu schematów `zod`. W przypadku niepowodzenia walidacji, endpoint natychmiast zwróci odpowiedź 400 Bad Request.
-- **Obsługa wyjątków**: Logika endpointów będzie opakowana w bloki `try...catch`, aby przechwytywać błędy z Supabase API (np. `AuthApiError`). Błędy te będą mapowane na odpowiednie statusy HTTP i komunikaty JSON, które frontend będzie mógł zinterpretować i wyświetlić użytkownikowi.
-
-## 4. System Uwierzytelniania (Supabase Auth)
-
-Integracja z Supabase Auth będzie kluczowym elementem systemu.
-
-- **Konfiguracja**: Istniejące klucze Supabase (URL i `anon key`) przechowywane w zmiennych środowiskowych (`.env`) będą wykorzystywane przez aplikację poprzez `import.meta.env`.
-- **Inicjalizacja klienta**: Istniejący klient Supabase, inicjalizowany w `src/db/supabase.client.ts`, będzie reużywany w całej aplikacji.
-- **Zarządzanie sesją**: Główna odpowiedzialność za zarządzanie sesją spocznie na middleware (`src/middleware/index.ts`). Będzie on odczytywał, weryfikował i odświeżał sesję przy każdym żądaniu serwerowym, udostępniając ją w `Astro.locals`. Dzięki temu każda strona renderowana na serwerze będzie miała natychmiastowy dostęp do informacji o zalogowanym użytkowniku.
-- **Szablony e-mail**: W panelu Supabase zostaną skonfigurowane szablony wiadomości e-mail (potwierdzenie rejestracji, reset hasła), aby zawierały poprawne linki zwrotne do aplikacji (`/auth/callback`, `/auth/password-reset`).
-
-## 5. Podsumowanie Zmian w Strukturze Projektu
-
-- **Nowe pliki**:
-    - `src/pages/auth/login.astro`
-    - `src/pages/auth/register.astro`
-    - `src/pages/auth/password-reset.astro`
-    - `src/pages/auth/callback.astro`
-    - `src/pages/api/auth/login.ts`
-    - `src/pages/api/auth/register.ts`
-    - `src/pages/api/auth/logout.ts`
-    - `src/pages/api/auth/password-reset.ts`
-    - `src/pages/api/auth/password-update.ts`
-    - `src/components/auth/LoginForm.tsx`
-    - `src/components/auth/RegisterForm.tsx`
-    - `src/components/auth/PasswordResetForm.tsx`
-- **Zmodyfikowane pliki**:
-    - `src/middleware/index.ts`
-    - `src/layouts/Layout.astro`
-
+1.  Użytkownik wypełnia formularz na stronie `/signup`.
+2.  Dane są wysyłane do `/api/auth/signup`.
+3.  API wywołuje `supabase.auth.signUp()`. Supabase wysyła e-mail weryfikacyjny.
+4.  Frontend po otrzymaniu odpowiedzi 201 przekierowuje użytkownika na stronę `/check-email`.
+5.  Użytkownik klika link w e-mailu, który prowadzi do strony `/callback`.
+6.  Strona `/callback` po stronie serwera obsługuje sesję, a następnie przekierowuje użytkownika na `/login` z komunikatem o pomyślnej weryfikacji.

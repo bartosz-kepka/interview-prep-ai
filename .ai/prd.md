@@ -25,8 +25,7 @@ Kandydaci do pracy często przygotowują się do rozmów w oparciu o ogólnodost
 - Po rejestracji wymagana jest weryfikacja adresu e-mail poprzez kliknięcie w link wysłany na podany adres.
 - Użytkownik może zalogować się do aplikacji przy użyciu swojego e-maila i hasła.
 - Użytkownik może skorzystać z funkcji "resetuj hasło", aby odzyskać dostęp do konta.
-- Niezalogowany użytkownik ma dostęp do widoku generowania pytań, ale nie może zapisywać wygenerowanych pytań ani zarządzać pytaniami.
-- Aby wyświetlić listę pytań lub zarządzać nimi, użytkownik musi być zalogowany.
+- Niezalogowany użytkownik nie ma dostępu do funkcji zarządzania pytaniami ani generatora AI.
 
 ### 3.2. Zarządzanie Pytaniami (CRUD)
 - Użytkownik może ręcznie dodać nowe pytanie wraz z własną odpowiedzią.
