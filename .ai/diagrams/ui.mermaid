@@ -1,0 +1,82 @@
+flowchart TD
+    classDef new fill:#c8e6c9,stroke:#388e3c,stroke-width:2px;
+    classDef modified fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
+    classDef page fill:#bbdefb,stroke:#1976d2;
+    classDef component fill:#f8bbd0,stroke:#c2185b;
+    classDef layout fill:#e1bee7,stroke:#7b1fa2;
+    classDef middleware fill:#b2dfdb,stroke:#00796b;
+
+    subgraph "Strony Publiczne (Astro)"
+        direction LR
+        P_Login["/login.astro"]:::page
+        P_Signup["/signup.astro"]:::page
+        P_ForgotPassword["/forgot-password.astro"]:::page
+        P_ResetPassword["/reset-password.astro"]:::page
+        P_CheckEmail["/check-email.astro"]:::page
+        P_Error["/error/expired-link.astro"]:::page
+    end
+
+    subgraph "Komponenty Interaktywne (React)"
+        direction LR
+        C_LoginForm["LoginForm.tsx"]:::component
+        C_SignUpForm["SignUpForm.tsx"]:::component
+        C_ForgotPasswordForm["ForgotPasswordForm.tsx"]:::component
+        C_ResetPasswordForm["ResetPasswordForm.tsx"]:::component
+        C_LogoutButton["LogoutButton.tsx"]:::component
+    end
+
+    subgraph "Strony Chronione (Astro)"
+        P_Generator["/generator.astro"]:::page
+        P_Index["/index.astro"]:::page
+    end
+
+    subgraph "Infrastruktura Aplikacji"
+        L_Layout["Layout.astro"]:::layout
+        M_Middleware["middleware/index.ts"]:::middleware
+    end
+
+    %% Powiązania Stron z Komponentami
+    P_Login --> C_LoginForm
+    P_Signup --> C_SignUpForm
+    P_ForgotPassword --> C_ForgotPasswordForm
+    P_ResetPassword --> C_ResetPasswordForm
+
+    %% Powiązania z Layoutem
+    L_Layout --> P_Login
+    L_Layout --> P_Signup
+    L_Layout --> P_ForgotPassword
+    L_Layout --> P_ResetPassword
+    L_Layout --> P_CheckEmail
+    L_Layout --> P_Error
+    L_Layout --> P_Generator
+    L_Layout --> P_Index
+    L_Layout -- "Wyświetla przycisk wylogowania" --> C_LogoutButton
+
+    %% Przepływ danych i interakcje
+    User([Użytkownik]) --> P_Generator
+    P_Generator -- "Brak sesji" --> M_Middleware
+    M_Middleware -- "Przekierowanie" --> P_Login
+    User -- "Wprowadza dane" --> C_LoginForm
+    C_LoginForm -- "Wyślij dane (fetch)" --> API_Login["API: /api/auth/login"]
+    API_Login -- "Komunikacja z Supabase" --> Supabase[(Supabase Auth)]
+    Supabase -- "Odpowiedź" --> API_Login
+    API_Login -- "Ustawia ciasteczka sesji" --> M_Middleware
+    API_Login -- "Odpowiedź (sukces/błąd)" --> C_LoginForm
+    C_LoginForm -- "Przekierowanie po sukcesie" --> P_Generator
+
+    %% Ochrona tras
+    M_Middleware -- "Ochrona trasy" --> P_Generator
+    M_Middleware -- "Ochrona trasy" --> P_Index
+
+    %% Rejestracja
+    User -- "Wchodzi na /signup" --> P_Signup
+    P_Signup --> C_SignUpForm
+    C_SignUpForm -- "Wyślij dane (fetch)" --> API_Signup["API: /api/auth/signup"]
+    API_Signup --> Supabase
+    Supabase -- "Wysyła e-mail weryfikacyjny" --> User
+    API_Signup -- "Odpowiedź" --> C_SignUpForm
+    C_SignUpForm -- "Przekierowanie" --> P_CheckEmail
+
+    %% Klasy stylizujące
+    class P_Login,P_Signup,P_ForgotPassword,P_ResetPassword,P_CheckEmail,P_Error,C_LoginForm,C_SignUpForm,C_ForgotPasswordForm,C_ResetPasswordForm,C_LogoutButton,API_Login,API_Signup new
+    class L_Layout,M_Middleware modified
