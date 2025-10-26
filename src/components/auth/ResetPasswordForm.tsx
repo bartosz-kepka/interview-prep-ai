@@ -54,6 +54,20 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSubmit }
     }
   };
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (errors.password) {
+      setErrors((prev) => ({ ...prev, password: undefined }));
+    }
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmPassword(e.target.value);
+    if (errors.confirmPassword) {
+      setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {apiError && (
@@ -71,7 +85,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSubmit }
           type="password"
           placeholder="At least 8 characters"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={handlePasswordChange}
           aria-invalid={!!errors.password}
           aria-describedby={errors.password ? `${passwordId}-error` : undefined}
         />
@@ -91,7 +105,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSubmit }
           type="password"
           placeholder="Re-enter your password"
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          onChange={handleConfirmPasswordChange}
           aria-invalid={!!errors.confirmPassword}
           aria-describedby={errors.confirmPassword ? `${confirmPasswordId}-error` : undefined}
         />
@@ -108,4 +122,3 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSubmit }
     </form>
   );
 };
-

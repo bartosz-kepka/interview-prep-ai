@@ -48,6 +48,20 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
     }
   };
 
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (errors.email) {
+      setErrors((prev) => ({ ...prev, email: undefined }));
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (errors.password) {
+      setErrors((prev) => ({ ...prev, password: undefined }));
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {apiError && (
@@ -65,7 +79,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
           type="email"
           placeholder="your.email@example.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={handleEmailChange}
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? `${emailId}-error` : undefined}
         />
@@ -85,7 +99,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
           type="password"
           placeholder="At least 8 characters"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={handlePasswordChange}
           aria-invalid={!!errors.password}
           aria-describedby={errors.password ? `${passwordId}-error` : undefined}
         />
@@ -105,4 +119,3 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
     </form>
   );
 };
-
