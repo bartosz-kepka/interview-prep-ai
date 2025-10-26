@@ -44,7 +44,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     email,
     password,
     options: {
-      emailRedirectTo: 'http://localhost:3000/api/auth/callback'
+      emailRedirectTo: `${new URL(request.url).origin}/api/auth/callback`,
     }
   });
 
