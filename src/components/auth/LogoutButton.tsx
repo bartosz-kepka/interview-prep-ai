@@ -1,34 +1,44 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../ui/button';
 
-interface LogoutButtonProps {
-  onLogout?: () => Promise<void>;
-}
-
-export const LogoutButton: React.FC<LogoutButtonProps> = ({ onLogout }) => {
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+export const LogoutButton = () => {
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {
-    if (onLogout) {
-      setIsLoggingOut(true);
-      try {
-        await onLogout();
-      } catch (error) {
-        console.error('Logout failed:', error);
-      } finally {
-        setIsLoggingOut(false);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Redirect to login page after successful logout
+        window.location.href = '/login';
+      } else {
+        const data = await response.json();
+        console.error('Logout failed:', data.error);
+        alert('Nie udało się wylogować. Spróbuj ponownie.');
       }
+    } catch (error) {
+      console.error('Logout error:', error);
+      alert('Wystąpił błąd podczas wylogowywania.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Button
+      onClick={handleLogout}
+      disabled={isLoading}
       variant="outline"
       size="sm"
-      onClick={handleLogout}
-      disabled={isLoggingOut}
     >
-      {isLoggingOut ? 'Logging out...' : 'Log Out'}
+      {isLoading ? 'Wylogowywanie...' : 'Wyloguj'}
     </Button>
   );
 };
