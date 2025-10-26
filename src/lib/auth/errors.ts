@@ -4,6 +4,8 @@ export type AuthErrorCode =
   | 'EMAIL_NOT_CONFIRMED'
   | 'INVALID_CREDENTIALS'
   | 'USER_NOT_FOUND'
+  | 'USER_EXISTS'
+  | 'SIGNUP_FAILED'
   | 'GENERIC_ERROR';
 
 export interface AuthErrorResponse {

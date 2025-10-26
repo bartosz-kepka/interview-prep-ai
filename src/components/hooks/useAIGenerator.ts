@@ -70,7 +70,7 @@ export const useAIGenerator = () => {
 
       const data: SaveGeneratedQuestionsResponseDto = await response.json();
       // On success, redirect to the main questions list page
-      // window.location.href = '/';
+      window.location.href = '/';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
       setStatus('error');

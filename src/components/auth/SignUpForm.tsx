@@ -4,11 +4,7 @@ import { Input } from '../ui/input';
 import { Alert, AlertDescription } from '../ui/alert';
 import { signUpSchema, type SignUpInput } from '@/lib/auth/validation';
 
-interface SignUpFormProps {
-  onSubmit?: (data: SignUpInput) => Promise<void>;
-}
-
-export const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
+export const SignUpForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<Partial<SignUpInput>>({});
@@ -23,6 +19,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
     setErrors({});
     setApiError(null);
 
+    // Client-side validation
     const result = signUpSchema.safeParse({ email, password });
 
     if (!result.success) {
@@ -36,15 +33,38 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
       return;
     }
 
-    if (onSubmit) {
-      setIsSubmitting(true);
-      try {
-        await onSubmit(result.data);
-      } catch (error) {
-        setApiError(error instanceof Error ? error.message : 'An error occurred during sign up');
-      } finally {
-        setIsSubmitting(false);
+    setIsSubmitting(true);
+
+    try {
+      // Call signup API endpoint
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(result.data),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle validation errors (422)
+        if (response.status === 422 && data.fields) {
+          setErrors(data.fields);
+          return;
+        }
+
+        // Display API error message
+        setApiError(data.error || 'An error occurred during sign up');
+        return;
       }
+
+      // Success - redirect to check-email page
+      window.location.href = '/check-email';
+    } catch (error) {
+      setApiError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -65,7 +85,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {apiError && (
-        <Alert className="mb-4">
+        <Alert className="mb-4 border-destructive/50 text-destructive">
           <AlertDescription>{apiError}</AlertDescription>
         </Alert>
       )}
@@ -82,6 +102,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
           onChange={handleEmailChange}
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? `${emailId}-error` : undefined}
+          disabled={isSubmitting}
         />
         {errors.email && (
           <p id={`${emailId}-error`} className="mt-1 text-sm text-destructive">
@@ -102,6 +123,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit }) => {
           onChange={handlePasswordChange}
           aria-invalid={!!errors.password}
           aria-describedby={errors.password ? `${passwordId}-error` : undefined}
+          disabled={isSubmitting}
         />
         {errors.password && (
           <p id={`${passwordId}-error`} className="mt-1 text-sm text-destructive">

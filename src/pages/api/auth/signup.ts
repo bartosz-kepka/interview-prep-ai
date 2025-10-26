@@ -1,11 +1,10 @@
 import type { APIRoute } from 'astro';
 import { createSupabaseServerInstance } from '@/db/supabase.client';
-import { loginSchema } from '@/lib/auth/validation';
-import { mapAuthError } from '@/lib/auth/errors';
+import { signUpSchema } from '@/lib/auth/validation';
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, cookies, url }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   // Parse and validate request body
   let body;
   try {
@@ -18,7 +17,7 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
   }
 
   // Validate input with Zod
-  const validationResult = loginSchema.safeParse(body);
+  const validationResult = signUpSchema.safeParse(body);
   if (!validationResult.success) {
     const fieldErrors: Record<string, string> = {};
     validationResult.error.errors.forEach((error) => {
@@ -40,44 +39,46 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
     headers: request.headers,
   });
 
-  // Attempt to sign in
-  const { data, error } = await supabase.auth.signInWithPassword({
+  // Attempt to sign up
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
   });
 
-  // Handle authentication errors with detailed messages
+  // Handle authentication errors
   if (error) {
-    const authError = mapAuthError(error);
-    return new Response(
-      JSON.stringify(authError),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+    // Check for existing user
+    if (error.message.toLowerCase().includes('user already registered')) {
+      return new Response(
+        JSON.stringify({
+          error: 'An account with this email already exists',
+          code: 'USER_EXISTS'
+        }),
+        { status: 409, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-  // Check if email is verified (additional check)
-  if (!data.user?.email_confirmed_at) {
-    // Sign out the user since they shouldn't be logged in
-    await supabase.auth.signOut();
-
+    // Generic error
     return new Response(
       JSON.stringify({
-        error: 'Please verify your email address before logging in',
-        code: 'EMAIL_NOT_CONFIRMED'
+        error: error.message || 'Failed to create account',
+        code: 'SIGNUP_FAILED'
       }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
   }
 
-  // Success - cookies are automatically set by Supabase SSR
+  // Success - user needs to confirm email
   return new Response(
     JSON.stringify({
       success: true,
+      message: 'Please check your email to verify your account',
       user: {
-        id: data.user.id,
-        email: data.user.email,
+        id: data.user?.id,
+        email: data.user?.email,
       }
     }),
     { status: 200, headers: { 'Content-Type': 'application/json' } }
   );
 };
+
