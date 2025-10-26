@@ -4,11 +4,7 @@ import { Input } from '../ui/input';
 import { Alert, AlertDescription } from '../ui/alert';
 import { loginSchema, type LoginInput } from '@/lib/auth/validation';
 
-interface LoginFormProps {
-  onSubmit?: (data: LoginInput) => Promise<void>;
-}
-
-export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<Partial<LoginInput>>({});
@@ -23,6 +19,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
     setErrors({});
     setApiError(null);
 
+    // Client-side validation
     const result = loginSchema.safeParse({ email, password });
 
     if (!result.success) {
@@ -36,15 +33,46 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
       return;
     }
 
-    if (onSubmit) {
-      setIsSubmitting(true);
-      try {
-        await onSubmit(result.data);
-      } catch (error) {
-        setApiError(error instanceof Error ? error.message : 'An error occurred during login');
-      } finally {
-        setIsSubmitting(false);
+    setIsSubmitting(true);
+
+    try {
+      // Call login API endpoint
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(result.data),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle validation errors (422)
+        if (response.status === 422 && data.fields) {
+          setErrors(data.fields);
+          return;
+        }
+
+        // Handle email not confirmed error - redirect to check-email
+        if (data.code === 'EMAIL_NOT_CONFIRMED') {
+          window.location.href = '/check-email';
+          return;
+        }
+
+        // Display API error message
+        setApiError(data.error || 'An error occurred during login');
+        return;
       }
+
+      // Success - redirect to appropriate page
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTo = urlParams.get('redirect') || '/';
+      window.location.href = redirectTo;
+    } catch (error) {
+      setApiError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -65,7 +93,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {apiError && (
-        <Alert className="mb-4">
+        <Alert className="mb-4 border-destructive/50 text-destructive">
           <AlertDescription>{apiError}</AlertDescription>
         </Alert>
       )}
@@ -82,6 +110,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
           onChange={handleEmailChange}
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? `${emailId}-error` : undefined}
+          disabled={isSubmitting}
         />
         {errors.email && (
           <p id={`${emailId}-error`} className="mt-1 text-sm text-destructive">
@@ -102,6 +131,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
           onChange={handlePasswordChange}
           aria-invalid={!!errors.password}
           aria-describedby={errors.password ? `${passwordId}-error` : undefined}
+          disabled={isSubmitting}
         />
         {errors.password && (
           <p id={`${passwordId}-error`} className="mt-1 text-sm text-destructive">
