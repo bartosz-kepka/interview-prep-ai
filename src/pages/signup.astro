@@ -1,0 +1,43 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card';
+import { SignUpForm } from '../components/auth/SignUpForm';
+
+export const prerender = false;
+---
+
+<Layout title="Sign Up - Interview Prep AI">
+  <main class="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md">
+      <Card>
+        <CardHeader>
+          <CardTitle>Create an account</CardTitle>
+          <CardDescription>Sign up to start generating interview questions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SignUpForm client:load />
+
+          <div class="mt-6">
+            <div class="relative">
+              <div class="absolute inset-0 flex items-center">
+                <span class="w-full border-t"></span>
+              </div>
+              <div class="relative flex justify-center text-xs uppercase">
+                <span class="bg-card px-2 text-muted-foreground">
+                  Already have an account?
+                </span>
+              </div>
+            </div>
+
+            <div class="text-center mt-4">
+              <a href="/login" class="text-sm text-primary hover:underline font-medium">
+                Log in instead
+              </a>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </main>
+</Layout>
+

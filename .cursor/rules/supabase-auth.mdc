@@ -113,11 +113,11 @@ import { defineMiddleware } from 'astro:middleware';
 const PUBLIC_PATHS = [
   // Server-Rendered Astro Pages
   "/auth/login",
-  "/auth/register",
+  "/auth/signup",
   "/auth/reset-password",
   // Auth API endpoints
   "/api/auth/login",
-  "/api/auth/register",
+  "/api/auth/signup",
   "/api/auth/reset-password",
 ];
 
