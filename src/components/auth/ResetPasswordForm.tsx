@@ -5,10 +5,10 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { resetPasswordSchema, type ResetPasswordInput } from '@/lib/auth/validation';
 
 interface ResetPasswordFormProps {
-  onSubmit?: (data: ResetPasswordInput) => Promise<void>;
+  code: string;
 }
 
-export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSubmit }) => {
+export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ code }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<Partial<ResetPasswordInput & { confirmPassword?: string }>>({});
@@ -29,7 +29,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSubmit }
       return;
     }
 
-    const result = resetPasswordSchema.safeParse({ password });
+    const result = resetPasswordSchema.safeParse({ password, code });
 
     if (!result.success) {
       const fieldErrors: Partial<ResetPasswordInput> = {};
@@ -42,15 +42,38 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSubmit }
       return;
     }
 
-    if (onSubmit) {
-      setIsSubmitting(true);
-      try {
-        await onSubmit(result.data);
-      } catch (error) {
-        setApiError(error instanceof Error ? error.message : 'An error occurred');
-      } finally {
-        setIsSubmitting(false);
+    setIsSubmitting(true);
+
+    try {
+      // Call update password API endpoint
+      const response = await fetch('/api/auth/update-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(result.data),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle validation errors (422)
+        if (response.status === 422 && data.fields) {
+          setErrors(data.fields);
+          return;
+        }
+
+        // Display API error message
+        setApiError(data.error || 'An error occurred');
+        return;
       }
+
+      // Success - redirect to home page
+      window.location.href = '/';
+    } catch (error) {
+      setApiError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

@@ -5,14 +5,14 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/auth/validation';
 
 interface ForgotPasswordFormProps {
-  onSubmit?: (data: ForgotPasswordInput) => Promise<void>;
 }
 
-export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSubmit }) => {
+export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = () => {
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<Partial<ForgotPasswordInput>>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const emailId = useId();
 
@@ -20,6 +20,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSubmit
     e.preventDefault();
     setErrors({});
     setApiError(null);
+    setSuccessMessage(null);
 
     const result = forgotPasswordSchema.safeParse({ email });
 
@@ -34,15 +35,39 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSubmit
       return;
     }
 
-    if (onSubmit) {
-      setIsSubmitting(true);
-      try {
-        await onSubmit(result.data);
-      } catch (error) {
-        setApiError(error instanceof Error ? error.message : 'An error occurred');
-      } finally {
-        setIsSubmitting(false);
+    setIsSubmitting(true);
+
+    try {
+      // Call reset password API endpoint
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(result.data),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle validation errors (422)
+        if (response.status === 422 && data.fields) {
+          setErrors(data.fields);
+          return;
+        }
+
+        // Display API error message
+        setApiError(data.error || 'An error occurred');
+        return;
       }
+
+      // Success
+      setSuccessMessage(data.message);
+      setEmail(''); // Clear the form
+    } catch (error) {
+      setApiError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -58,6 +83,11 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onSubmit
       {apiError && (
         <Alert className="mb-4">
           <AlertDescription>{apiError}</AlertDescription>
+        </Alert>
+      )}
+      {successMessage && (
+        <Alert className="mb-4 border-green-500 bg-green-50 text-green-800">
+          <AlertDescription>{successMessage}</AlertDescription>
         </Alert>
       )}
 

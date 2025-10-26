@@ -35,7 +35,7 @@ const isUnauthorizedOnlyPath = (pathname: string): boolean => {
 };
 
 
-export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
+export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect, site }, next) => {
   // Create Supabase instance with SSR support
   const supabase = createSupabaseServerInstance({
     cookies,
