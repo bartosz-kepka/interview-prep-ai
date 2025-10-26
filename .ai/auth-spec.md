@@ -72,7 +72,7 @@ Zgodnie z praktykami Astro, endpointy API zostaną umieszczone w `src/pages/api/
 
 - **`src/pages/api/auth/callback.ts`**:
   - Metoda: `GET`
-  - Logika: Endpoint serwerowy, który Supabase wywoła po kliknięciu linku weryfikacyjnego. Wymienia kod autoryzacyjny na sesję za pomocą `supabase.auth.exchangeCodeForSession()`. Jeśli operacja się powiedzie, ustawia ciasteczka sesji i przekierowuje użytkownika do głównego widoku aplikacji (np. `/generator`). W przypadku błędu (np. wygasły link), przekierowuje na stronę `/error/expired-link`.
+  - Logika: Endpoint serwerowy, który Supabase wywoła po kliknięciu linku weryfikacyjnego. Wymienia kod autoryzacyjny na sesję za pomocą `supabase.auth.exchangeCodeForSession()`. Jeśli operacja się powiedzie, ustawia ciasteczka sesji i przekierowuje użytkownika do głównego widoku aplikacji (np. `/`). W przypadku błędu (np. wygasły link), przekierowuje na stronę `/error/expired-link`.
 
 - **`src/pages/api/auth/reset-password.ts`**:
   - Metoda: `POST`
@@ -113,7 +113,6 @@ Kluczowym elementem systemu będzie middleware Astro, który będzie chronił tr
 #### 4.2. Konfiguracja Supabase
 
 - **Klient Supabase**: Istniejący klient w `src/db/supabase.client.ts` będzie używany zarówno na serwerze (w middleware i API), jak i po stronie klienta (w komponentach React). Należy upewnić się, że jest on skonfigurowany jako singleton.
-- **Szablony e-mail**: W panelu Supabase zostaną skonfigurowane szablony e-mail dla weryfikacji konta i resetowania hasła, aby zawierały poprawne linki zwrotne do aplikacji (np. `https://twoja-domena.com/api/auth/callback` i `https://twoja-domena.com/reset-password`).
 - **URL-e przekierowań**: W ustawieniach Supabase Auth należy dodać adres URL aplikacji do listy dozwolonych przekierowań.
 
 #### 4.3. Przepływ Danych (Podsumowanie)
@@ -133,4 +132,4 @@ Kluczowym elementem systemu będzie middleware Astro, który będzie chronił tr
 3.  API wywołuje `supabase.auth.signUp()`. Supabase wysyła e-mail weryfikacyjny.
 4.  Frontend po otrzymaniu odpowiedzi 201 przekierowuje użytkownika na stronę `/check-email`.
 5.  Użytkownik klika link w e-mailu, który prowadzi do endpointu `/api/auth/callback`.
-6.  Endpoint `/api/auth/callback` po stronie serwera wymienia kod na sesję, ustawia ciasteczka i przekierowuje uwierzytelnionego użytkownika do głównego widoku aplikacji (np. `/generator`). W przypadku błędu (wygasły link), użytkownik jest przekierowywany na stronę błędu.
+6.  Endpoint `/api/auth/callback` po stronie serwera wymienia kod na sesję, ustawia ciasteczka i przekierowuje uwierzytelnionego użytkownika do głównego widoku aplikacji (np. `/`). W przypadku błędu (wygasły link), użytkownik jest przekierowywany na stronę błędu.

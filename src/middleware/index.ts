@@ -3,7 +3,7 @@ import { createSupabaseServerInstance } from '../db/supabase.client.ts';
 
 // Paths accessible to everyone (both authenticated and unauthenticated users)
 const PUBLIC_PATHS = [
-  '/api/auth/callback',
+    '/api/auth/callback',
   '/error/expired-link'
 ];
 
