@@ -83,7 +83,7 @@ export const SignUpForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {apiError && (
         <Alert className="mb-4 border-destructive/50 text-destructive">
           <AlertDescription>{apiError}</AlertDescription>

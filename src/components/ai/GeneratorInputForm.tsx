@@ -25,7 +25,7 @@ export const GeneratorInputForm: React.FC<GeneratorInputFormProps> = ({
   const isDisabled = !sourceText.trim() || sourceText.length > 10000 || isGenerating;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       <div>
         <label htmlFor={textareaId} className="block text-sm font-medium mb-2">
           Job Description or Text to Generate Questions From

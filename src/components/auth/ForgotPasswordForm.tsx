@@ -79,7 +79,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       {apiError && (
         <Alert className="mb-4">
           <AlertDescription>{apiError}</AlertDescription>
