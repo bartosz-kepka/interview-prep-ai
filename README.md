@@ -70,6 +70,8 @@ The following scripts are available in the `package.json`:
 - `npm run lint`: Lints the codebase for errors.
 - `npm run lint:fix`: Lints the codebase and automatically fixes issues.
 - `npm run format`: Formats the code using Prettier.
+- `npm run test:unit`: Runs unit tests with Vitest.
+- `npm run test:e2e`: Runs end-to-end tests with Playwright.
 
 ## Project Scope
 
