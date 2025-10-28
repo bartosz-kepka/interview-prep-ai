@@ -111,6 +111,7 @@ export const LoginForm: React.FC = () => {
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? `${emailId}-error` : undefined}
           disabled={isSubmitting}
+          data-test-id="login-email-input"
         />
         {errors.email && (
           <p id={`${emailId}-error`} className="mt-1 text-sm text-destructive">
@@ -132,6 +133,7 @@ export const LoginForm: React.FC = () => {
           aria-invalid={!!errors.password}
           aria-describedby={errors.password ? `${passwordId}-error` : undefined}
           disabled={isSubmitting}
+          data-test-id="login-password-input"
         />
         {errors.password && (
           <p id={`${passwordId}-error`} className="mt-1 text-sm text-destructive">
@@ -140,7 +142,7 @@ export const LoginForm: React.FC = () => {
         )}
       </div>
 
-      <Button type="submit" disabled={isSubmitting} className="w-full">
+      <Button type="submit" disabled={isSubmitting} className="w-full" data-test-id="login-submit-button">
         {isSubmitting ? 'Logging in...' : 'Log In'}
       </Button>
     </form>

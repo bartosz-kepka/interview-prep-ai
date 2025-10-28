@@ -24,6 +24,12 @@ interface ImportMetaEnv {
   readonly SUPABASE_KEY: string;
   readonly OPENROUTER_API_KEY: string;
   readonly PROD: boolean;
+
+  // E2E test user credentials
+  readonly E2E_USER_ID: string;
+  readonly E2E_EMAIL: string;
+  readonly E2E_PASSWORD: string;
+
   // more env variables...
 }
 

@@ -38,14 +38,15 @@ export const GeneratorInputForm: React.FC<GeneratorInputFormProps> = ({
           rows={10}
           className="w-full min-h-64 max-h-64"
           aria-describedby={counterId}
+          data-test-id="generator-input-textarea"
         />
         <div id={counterId} className="mt-2 text-sm text-gray-600" aria-live="polite">
           {sourceText.length}/10000 characters
         </div>
-      </div>
-      <Button type="submit" disabled={isDisabled} className="w-full">
+      <Button type="submit" disabled={isDisabled} className="w-full" data-test-id="generator-submit-button">
         {isGenerating ? 'Generating...' : 'Generate Questions'}
       </Button>
+      </div>
     </form>
   );
 };

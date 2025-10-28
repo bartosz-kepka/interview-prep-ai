@@ -22,13 +22,14 @@ export const GeneratedQuestionItem: React.FC<GeneratedQuestionItemProps> = ({
   const answerTextareaId = useId();
 
   return (
-    <Card>
+    <Card data-test-id="generated-question-item">
       <CardHeader className="pb-3">
         <div className="flex items-center space-x-2">
           <Checkbox
             id={checkboxId}
             checked={question.selected}
             onCheckedChange={() => onToggleSelect(question.id)}
+            data-test-id="question-select-checkbox"
           />
           <CardTitle asChild>
             <label htmlFor={checkboxId} className="text-lg cursor-pointer">
@@ -48,6 +49,7 @@ export const GeneratedQuestionItem: React.FC<GeneratedQuestionItemProps> = ({
             onChange={(e) => onQuestionUpdate(question.id, e.target.value)}
             disabled={!question.selected}
             rows={3}
+            data-test-id="question-textarea"
             placeholder="Edit the question..."
           />
         </div>
@@ -59,7 +61,8 @@ export const GeneratedQuestionItem: React.FC<GeneratedQuestionItemProps> = ({
             id={answerTextareaId}
             value={question.answer}
             onChange={(e) => onAnswerUpdate(question.id, e.target.value)}
-            disabled={!question.selected}
+            placeholder="Add your answer here..."
+            data-test-id="answer-textarea"
             rows={3}
             placeholder="Provide an answer..."
           />
