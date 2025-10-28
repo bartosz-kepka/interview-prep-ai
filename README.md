@@ -72,6 +72,8 @@ The following scripts are available in the `package.json`:
 - `npm run format`: Formats the code using Prettier.
 - `npm run test:unit`: Runs unit tests with Vitest.
 - `npm run test:e2e`: Runs end-to-end tests with Playwright.
+- `npm run test:e2e:headed`: Runs end-to-end tests in headed mode, showing the browser.
+- `npm run test:e2e:ui`: Opens the Playwright UI for interactive testing.
 
 ## Project Scope
 
