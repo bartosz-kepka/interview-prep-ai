@@ -1,6 +1,5 @@
 import type { APIRoute } from 'astro';
 import { saveGeneratedQuestions } from '../../../lib/services/questions.service';
-import { DEV_USER_ID } from '../../../db/supabase.client';
 import type { SaveGeneratedQuestionsCommand, SaveGeneratedQuestionsResponseDto } from '../../../types';
 import { NotFoundError, UnprocessableEntityError } from '../../../lib/errors';
 import { saveGeneratedQuestionsCommandSchema } from '../../../lib/ai/validation';
@@ -15,7 +14,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const command: SaveGeneratedQuestionsCommand = saveGeneratedQuestionsCommandSchema.parse(body);
 
     // Call the service
-    const savedQuestionIds = await saveGeneratedQuestions(locals.supabase, DEV_USER_ID, command);
+    const savedQuestionIds = await saveGeneratedQuestions(locals.supabase, locals.user.id, command);
 
     // Return success response
     const response: SaveGeneratedQuestionsResponseDto = {

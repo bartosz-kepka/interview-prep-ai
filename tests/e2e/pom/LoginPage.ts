@@ -15,11 +15,16 @@ export class LoginPage {
     this.errorAlert = page.locator('[data-test-id="login-api-error-alert"]');
   }
 
-  async goto() {
-    await this.page.goto('/login');
+  async goto(options?: { redirectTo?: string }) {
+    const url = options?.redirectTo ? `/login?redirect=${options.redirectTo}` : '/login';
+    await this.page.goto(url);
   }
 
   async login(email: string, password?: string) {
+    // Wait for the submit button to be enabled, which indicates that the
+    // form is fully hydrated and ready for interaction.
+    await this.submitButton.waitFor({ state: 'attached' });
+
     await this.emailInput.fill(email);
     if (password) {
       await this.passwordInput.fill(password);

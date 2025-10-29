@@ -1,7 +1,6 @@
 import type { APIRoute } from 'astro';
 import { generateQuestionsCommandSchema } from '@/lib/ai/validation.ts';
 import { generateQuestions } from '@/lib/ai/generation.service.ts';
-import { DEV_USER_ID } from '@/db/supabase.client.ts';
 import { BadGatewayError } from '@/lib/errors.ts';
 
 /**
@@ -35,9 +34,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Retrieve the Supabase client from context.locals.
     const supabase = locals.supabase;
+    const userId = locals.user.id;
 
     // Call the generateQuestions service function.
-    const result = await generateQuestions(source_text, DEV_USER_ID, supabase);
+    const result = await generateQuestions(source_text, userId, supabase);
 
     // Return a 200 OK response with the GenerateQuestionsResponseDto.
     return new Response(

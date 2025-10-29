@@ -34,7 +34,7 @@ test.describe('AI-01: AI Question Generator', () => {
   test.beforeEach(async ({ page }) => {
     // Step 1: Login
     loginPage = new LoginPage(page);
-    await loginPage.goto();
+    await loginPage.goto({ redirectTo: '/generator' });
     await loginPage.login(TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
     // Wait for successful login and redirection to the generator page
@@ -52,7 +52,7 @@ test.describe('AI-01: AI Question Generator', () => {
     await expect(aiGeneratorPage.generatorInputForm.submitButton).toHaveText('Generating...');
 
     // Step 4: Verify that the generated questions list appears
-    await expect(aiGeneratorPage.generatedQuestionsList.listContainer).toBeVisible({ timeout: 30000 }); // Increased timeout for AI generation
+    await expect(aiGeneratorPage.generatedQuestionsList.listContainer).toBeVisible({ timeout: 90000 }); // Increased timeout for AI generation
 
     const questionItems = await aiGeneratorPage.generatedQuestionsList.questionItems.all();
     expect(questionItems.length).toBeGreaterThan(0);
