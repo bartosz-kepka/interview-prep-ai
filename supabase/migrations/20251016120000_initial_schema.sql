@@ -105,10 +105,10 @@ create policy "Allow authenticated insert access" on public.ai_generation_logs
 for insert to authenticated with check (auth.uid() = user_id);
 
 create policy "Disallow authenticated update access" on public.ai_generation_logs
-for update to authenticated using (false);
+for update to authenticated using (auth.uid() = user_id);
 
 create policy "Disallow authenticated delete access" on public.ai_generation_logs
-for delete to authenticated using (false);
+for delete to authenticated using (auth.uid() = user_id);
 
 -- Policies for anonymous users
 create policy "Disallow anonymous read access" on public.ai_generation_logs

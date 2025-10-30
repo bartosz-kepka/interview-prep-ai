@@ -10,7 +10,7 @@ interface GenerateOptions<T extends z.ZodTypeAny> {
   params?: Record<string, any>;
 }
 
-const DEFAULT_MODEL = 'tngtech/deepseek-r1t2-chimera:free';
+const DEFAULT_MODEL = 'x-ai/grok-code-fast-1';
 
 export class OpenRouterService {
   private readonly apiKey: string;
