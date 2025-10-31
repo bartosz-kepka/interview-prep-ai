@@ -23,16 +23,16 @@ export const MobileNav = ({ userEmail }: { userEmail: string | undefined }) => {
 				</SheetHeader>
 				<div className="flex flex-col items-center space-y-6 py-8">
 					<a
+						href="/"
+						className="text-lg font-semibold text-foreground transition-colors hover:text-foreground/80"
+					>
+						Moje pytania
+					</a>
+					<a
 						href="/generator"
 						className="text-lg font-semibold text-foreground transition-colors hover:text-foreground/80"
 					>
 						Generator
-					</a>
-					<a
-						href="/my-questions"
-						className="text-lg font-semibold text-foreground transition-colors hover:text-foreground/80"
-					>
-						Moje pytania
 					</a>
 				</div>
 				<div className="absolute bottom-8 flex w-[85%] flex-col items-center justify-center space-y-4">
