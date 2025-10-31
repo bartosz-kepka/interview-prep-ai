@@ -1,7 +1,6 @@
 import {
 	Sheet,
 	SheetContent,
-	SheetDescription,
 	SheetHeader,
 	SheetTitle,
 	SheetTrigger,
@@ -21,25 +20,24 @@ export const MobileNav = ({ userEmail }: { userEmail: string | undefined }) => {
 			<SheetContent>
 				<SheetHeader>
 					<SheetTitle>Menu</SheetTitle>
-					<SheetDescription>Nawigacja</SheetDescription>
 				</SheetHeader>
-				<div className="grid gap-4 py-4">
-					<a href="/generator" className="text-sm font-medium hover:underline">
+				<div className="flex flex-col items-center space-y-6 py-8">
+					<a
+						href="/generator"
+						className="text-lg font-semibold text-foreground transition-colors hover:text-foreground/80"
+					>
 						Generator
 					</a>
-					{userEmail && (
-						<a href="/my-questions" className="text-sm font-medium hover:underline">
-							Moje pytania
-						</a>
-					)}
+					<a
+						href="/my-questions"
+						className="text-lg font-semibold text-foreground transition-colors hover:text-foreground/80"
+					>
+						Moje pytania
+					</a>
 				</div>
-				<div className="absolute bottom-4 flex w-[85%] flex-col items-center justify-center space-y-4">
-					{userEmail && (
-						<div className="flex flex-col items-center space-y-2">
-							<span className="text-sm font-medium text-gray-500">{userEmail}</span>
-							<LogoutButton />
-						</div>
-					)}
+				<div className="absolute bottom-8 flex w-[85%] flex-col items-center justify-center space-y-4">
+					<span className="text-sm font-medium text-muted-foreground">{userEmail}</span>
+					<LogoutButton />
 				</div>
 			</SheetContent>
 		</Sheet>
