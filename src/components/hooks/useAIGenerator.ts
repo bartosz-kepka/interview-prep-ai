@@ -3,12 +3,13 @@ import type {
   QuestionProposal,
   GenerateQuestionsResponseDto,
   SaveGeneratedQuestionsCommand,
-  SaveGeneratedQuestionsResponseDto,
 } from "../../types";
+import { useApi } from "./useApi";
 
 type Status = "idle" | "generating" | "success" | "error" | "saving";
 
 export const useAIGenerator = () => {
+  const { post, isSubmitting } = useApi();
   const [questionProposals, setQuestionProposals] = useState<QuestionProposal[]>([]);
   const [generationLogId, setGenerationLogId] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
@@ -18,28 +19,23 @@ export const useAIGenerator = () => {
     setStatus("generating");
     setError(null);
 
-    try {
-      const response = await fetch("/api/ai/generate-questions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ source_text: sourceText }),
-      });
+    const { data, error } = await post<GenerateQuestionsResponseDto, { source_text: string }>(
+      "/api/ai/generate-questions",
+      { source_text: sourceText }
+    );
 
-      if (!response.ok) {
-        throw new Error("Failed to generate questions. Please try again.");
-      }
+    if (error) {
+      setError(error.error);
+      setStatus("error");
+      return;
+    }
 
-      const data: GenerateQuestionsResponseDto = await response.json();
+    if (data) {
       setQuestionProposals(data.question_proposals);
       setGenerationLogId(data.generation_log_id);
       setStatus("success");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
-      setStatus("error");
     }
-  }, []);
+  }, [post]);
 
   const handleSave = useCallback(
     async (questions: SaveGeneratedQuestionsCommand["questions"]) => {
@@ -51,33 +47,25 @@ export const useAIGenerator = () => {
       setStatus("saving");
       setError(null);
 
-      try {
-        const command: SaveGeneratedQuestionsCommand = {
-          generation_log_id: generationLogId,
-          questions,
-        };
+      const command: SaveGeneratedQuestionsCommand = {
+        generation_log_id: generationLogId,
+        questions,
+      };
 
-        const response = await fetch("/api/ai/save-questions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(command),
-        });
+      const { error } = await post<never, SaveGeneratedQuestionsCommand>(
+        "/api/ai/save-questions",
+        command
+      );
 
-        if (!response.ok) {
-          throw new Error("Failed to save questions. Please try again.");
-        }
-
-        const data: SaveGeneratedQuestionsResponseDto = await response.json();
-        // On success, redirect to the main questions list page
-        window.location.href = "/";
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+      if (error) {
+        setError(error.error);
         setStatus("error");
+        return;
       }
+
+      window.location.href = "/";
     },
-    [generationLogId]
+    [generationLogId, post]
   );
 
   return {
@@ -85,6 +73,7 @@ export const useAIGenerator = () => {
     generationLogId,
     status,
     error,
+    isSubmitting,
     handleGenerate,
     handleSave,
   };
