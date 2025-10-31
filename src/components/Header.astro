@@ -26,13 +26,13 @@ const { user } = Astro.props;
       </nav>
     </div>
 
-    <div class="hidden items-center gap-4 sm:flex">
+    <div class="hidden items-center gap-4 md:flex">
       <span class="text-sm text-muted-foreground hidden sm:inline-block">
         {user.email}
       </span>
       <LogoutButton client:load />
     </div>
-    <div class="flex sm:hidden">
+    <div class="flex md:hidden">
       <MobileNav client:load userEmail={user.email} />
     </div>
   </div>
