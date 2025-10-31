@@ -1,7 +1,7 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card';
-import { SignUpForm } from '../components/auth/SignUpForm';
+import Layout from "../layouts/Layout.astro";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../components/ui/card";
+import { SignUpForm } from "../components/auth/SignUpForm";
 
 export const prerender = false;
 ---
@@ -23,16 +23,12 @@ export const prerender = false;
                 <span class="w-full border-t"></span>
               </div>
               <div class="relative flex justify-center text-xs uppercase">
-                <span class="bg-card px-2 text-muted-foreground">
-                  Already have an account?
-                </span>
+                <span class="bg-card px-2 text-muted-foreground"> Already have an account? </span>
               </div>
             </div>
 
             <div class="text-center mt-4">
-              <a href="/login" class="text-sm text-primary hover:underline font-medium">
-                Log in instead
-              </a>
+              <a href="/login" class="text-sm text-primary hover:underline font-medium"> Log in instead </a>
             </div>
           </div>
         </CardContent>
@@ -40,4 +36,3 @@ export const prerender = false;
     </div>
   </main>
 </Layout>
-

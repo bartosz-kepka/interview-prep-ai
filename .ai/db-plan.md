@@ -24,48 +24,48 @@ This table will be managed by Supabase's built-in authentication system. It stor
 
 This table stores the questions and answers created by users.
 
-| Column              | Type              | Constraints                                                              | Description                                                                 |
-| ------------------- | ----------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| `id`                | `uuid`            | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`                               | Unique identifier for the question.                                         |
-| `user_id`           | `uuid`            | `NOT NULL`, `REFERENCES auth.users(id) ON DELETE CASCADE`                | Foreign key linking to the user who owns the question.                      |
-| `generation_log_id` | `uuid`            | `NULL`, `REFERENCES ai_generation_logs(id) ON DELETE SET NULL`           | Optional foreign key linking to the AI generation log that created the question. |
-| `question`          | `varchar(10000)`  | `NOT NULL`                                                               | The text of the question.                                                   |
-| `answer`            | `varchar(10000)`  | `NULL`                                                                   | The user's answer to the question. Can be empty.                            |
-| `source`            | `question_source` | `NOT NULL`                                                               | The source of the question (`user`, `ai`, `ai-edited`).                     |
-| `created_at`        | `timestamptz`     | `NOT NULL`, `DEFAULT now()`                                              | Timestamp of when the question was created.                                 |
-| `updated_at`        | `timestamptz`     | `NOT NULL`                                                               | Timestamp of the last update. Managed by a trigger.                         |
+| Column              | Type              | Constraints                                                    | Description                                                                      |
+| ------------------- | ----------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `id`                | `uuid`            | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`                     | Unique identifier for the question.                                              |
+| `user_id`           | `uuid`            | `NOT NULL`, `REFERENCES auth.users(id) ON DELETE CASCADE`      | Foreign key linking to the user who owns the question.                           |
+| `generation_log_id` | `uuid`            | `NULL`, `REFERENCES ai_generation_logs(id) ON DELETE SET NULL` | Optional foreign key linking to the AI generation log that created the question. |
+| `question`          | `varchar(10000)`  | `NOT NULL`                                                     | The text of the question.                                                        |
+| `answer`            | `varchar(10000)`  | `NULL`                                                         | The user's answer to the question. Can be empty.                                 |
+| `source`            | `question_source` | `NOT NULL`                                                     | The source of the question (`user`, `ai`, `ai-edited`).                          |
+| `created_at`        | `timestamptz`     | `NOT NULL`, `DEFAULT now()`                                    | Timestamp of when the question was created.                                      |
+| `updated_at`        | `timestamptz`     | `NOT NULL`                                                     | Timestamp of the last update. Managed by a trigger.                              |
 
 ### `ai_generation_logs` Table
 
 This table logs all attempts to generate questions using the AI service.
 
-| Column          | Type                | Constraints                                                | Description                                                                 |
-| --------------- | ------------------- |------------------------------------------------------------| --------------------------------------------------------------------------- |
-| `id`            | `uuid`              | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`                 | Unique identifier for the log entry.                                        |
-| `user_id`       | `uuid`              | `NOT NULL`, `REFERENCES auth.users(id) ON DELETE SET NULL` | Foreign key linking to the user who initiated the generation.               |
-| `created_at`    | `timestamptz`       | `NOT NULL`, `DEFAULT now()`                                | Timestamp of when the generation task was initiated.                        |
-| `finished_at`   | `timestamptz`       | `NULL`                                                     | Timestamp of when the generation task completed (successfully or not).      |
-| `status`        | `generation_status` | `NULL`                                                     | The final status of the generation task (`success` or `error`).             |
-| `prompt`        | `varchar(100000)`   | `NOT NULL`                                                 | The full prompt (job offer text) sent to the AI service.                    |
-| `response`      | `varchar(100000)`   | `NULL`                                                     | The raw response received from the AI service.                              |
-| `error_details` | `text`              | `NULL`                                                     | Detailed information in case of an error during generation.                 |
+| Column          | Type                | Constraints                                                | Description                                                            |
+| --------------- | ------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `id`            | `uuid`              | `PRIMARY KEY`, `DEFAULT gen_random_uuid()`                 | Unique identifier for the log entry.                                   |
+| `user_id`       | `uuid`              | `NOT NULL`, `REFERENCES auth.users(id) ON DELETE SET NULL` | Foreign key linking to the user who initiated the generation.          |
+| `created_at`    | `timestamptz`       | `NOT NULL`, `DEFAULT now()`                                | Timestamp of when the generation task was initiated.                   |
+| `finished_at`   | `timestamptz`       | `NULL`                                                     | Timestamp of when the generation task completed (successfully or not). |
+| `status`        | `generation_status` | `NULL`                                                     | The final status of the generation task (`success` or `error`).        |
+| `prompt`        | `varchar(100000)`   | `NOT NULL`                                                 | The full prompt (job offer text) sent to the AI service.               |
+| `response`      | `varchar(100000)`   | `NULL`                                                     | The raw response received from the AI service.                         |
+| `error_details` | `text`              | `NULL`                                                     | Detailed information in case of an error during generation.            |
 
 ## 2. Table Relationships
 
--   **`auth.users` to `questions`**: One-to-Many. A user can have many questions. Deleting a user will cascade and delete all their associated questions.
--   **`auth.users` to `ai_generation_logs`**: One-to-Many. A user can have many AI generation logs. Deleting a user will cascade and set user_id in ai_generation_logs to `NULL`.
--   **`ai_generation_logs` to `questions`**: One-to-Many (Optional). A single AI generation log can result in multiple questions. This relationship is optional (`generation_log_id` is nullable). If a log is deleted, the `generation_log_id` in the associated questions will be set to `NULL`, preserving the questions.
+- **`auth.users` to `questions`**: One-to-Many. A user can have many questions. Deleting a user will cascade and delete all their associated questions.
+- **`auth.users` to `ai_generation_logs`**: One-to-Many. A user can have many AI generation logs. Deleting a user will cascade and set user_id in ai_generation_logs to `NULL`.
+- **`ai_generation_logs` to `questions`**: One-to-Many (Optional). A single AI generation log can result in multiple questions. This relationship is optional (`generation_log_id` is nullable). If a log is deleted, the `generation_log_id` in the associated questions will be set to `NULL`, preserving the questions.
 
 ## 3. Indexes
 
 To ensure query performance, the following indexes will be created:
 
--   **On `questions` table:**
-    -   `CREATE INDEX ON questions (user_id);` (Automatically created for the foreign key)
-    -   `CREATE INDEX ON questions (created_at DESC);` (For efficient sorting of questions from newest to oldest)
-    -   `CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE INDEX ON questions USING GIN (question gin_trgm_ops);` (For fast, case-insensitive text search on the `question` column)
--   **On `ai_generation_logs` table:**
-    -   `CREATE INDEX ON ai_generation_logs (user_id);` (Automatically created for the foreign key)
+- **On `questions` table:**
+  - `CREATE INDEX ON questions (user_id);` (Automatically created for the foreign key)
+  - `CREATE INDEX ON questions (created_at DESC);` (For efficient sorting of questions from newest to oldest)
+  - `CREATE EXTENSION IF NOT EXISTS pg_trgm; CREATE INDEX ON questions USING GIN (question gin_trgm_ops);` (For fast, case-insensitive text search on the `question` column)
+- **On `ai_generation_logs` table:**
+  - `CREATE INDEX ON ai_generation_logs (user_id);` (Automatically created for the foreign key)
 
 ## 4. Row-Level Security (RLS) Policies
 
@@ -108,7 +108,8 @@ FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Allow individual insert access" ON ai_generation_logs
 FOR INSERT WITH CHECK (auth.uid() = user_id);
 ```
-*Note: `UPDATE` and `DELETE` policies are omitted for `ai_generation_logs` as these operations are not intended for end-users.*
+
+_Note: `UPDATE` and `DELETE` policies are omitted for `ai_generation_logs` as these operations are not intended for end-users._
 
 ## 5. Additional Considerations & Triggers
 
@@ -132,4 +133,3 @@ BEFORE UPDATE ON questions
 FOR EACH ROW
 EXECUTE PROCEDURE handle_updated_at();
 ```
-

@@ -1,5 +1,6 @@
 <conversation_summary>
 <decisions>
+
 1.  **Editing AI-Generated Questions**: For each selected question, display the question and answer in `Textarea` components from shadcn/ui. These fields become `readOnly` when a question is deselected.
 2.  **Empty States**: For both "no search results" and a new user's empty question list, display a consistent UI that includes a clear message (e.g., "No questions found...") and relevant CTAs.
 3.  **Form Validation**: Display errors directly below the corresponding input field using a `Field` component from shadcn/ui.
@@ -26,62 +27,68 @@
 24. **Answer Visibility**: On the "My Questions" page, answers should be hidden by default within a `Collapsible` or `Accordion` component.
     </decisions>
     <matched_recommendations>
-1.  For each selected (checked) AI-generated question, display the question and answer in `Textarea` components from shadcn/ui. When a user unchecks a question, these fields should become disabled (`readOnly`).
-2.  Display a clear "empty state" message (e.g., "No questions found...") when a search yields no results, consistent with the UI for a new user with no questions.
-3.  Display form validation error messages directly below the corresponding input field using a `Field` component from shadcn/ui.
-4.  On mobile, replace text links in the header with a "hamburger" menu icon that opens a `Sheet` component.
-5.  Implement a skeleton loader for the initial question list fetch and when loading more items.
-6.  On the AI Generator page, use a responsive two-column layout for desktop and a stacked vertical layout for mobile.
-7.  After saving AI-generated questions, redirect the user to the "My Questions" page and show a success `Toast`.
-8.  Use a "Load More" button for pagination. Disable it with a message ("You've reached the end.") when `total_pages` is reached.
-9.  Use a subtle, smaller, muted-color `(optional)` suffix next to the label for non-required fields.
-10. On an expired link, redirect to an error page with an explanation and a "Go to forgot password page" button.
-11. On the AI generator, display a character count below the text area that turns red when the limit is reached.
-12. Use a browser confirmation dialog (`beforeunload`) to warn users about unsaved changes on the AI Generator page.
-13. Use a modal dialog for editing questions on the "My Questions" page.
-14. Use an `AlertDialog` component for delete confirmation, with a title, descriptive message, and "Cancel"/"Delete" buttons.
-15. Use a "Select All" checkbox with indeterminate state support for selecting/deselecting AI-generated questions.
-16. On the "My Questions" list, hide answers by default within a `Collapsible` or `Accordion` component for each question.
-17. Use the simple, single-column shadcn/ui blocks for the Login (`login-01`) and Sign Up (`signup-01`) pages, without SSO.
-18. After successful registration, redirect to a page instructing the user to check their email for verification.
-19. After successful email verification, redirect to the login page and display a success `Toast`.
-20. If an API request returns `401 Unauthorized`, automatically redirect to the login page and display a `Toast` explaining the session has expired.
+25. For each selected (checked) AI-generated question, display the question and answer in `Textarea` components from shadcn/ui. When a user unchecks a question, these fields should become disabled (`readOnly`).
+26. Display a clear "empty state" message (e.g., "No questions found...") when a search yields no results, consistent with the UI for a new user with no questions.
+27. Display form validation error messages directly below the corresponding input field using a `Field` component from shadcn/ui.
+28. On mobile, replace text links in the header with a "hamburger" menu icon that opens a `Sheet` component.
+29. Implement a skeleton loader for the initial question list fetch and when loading more items.
+30. On the AI Generator page, use a responsive two-column layout for desktop and a stacked vertical layout for mobile.
+31. After saving AI-generated questions, redirect the user to the "My Questions" page and show a success `Toast`.
+32. Use a "Load More" button for pagination. Disable it with a message ("You've reached the end.") when `total_pages` is reached.
+33. Use a subtle, smaller, muted-color `(optional)` suffix next to the label for non-required fields.
+34. On an expired link, redirect to an error page with an explanation and a "Go to forgot password page" button.
+35. On the AI generator, display a character count below the text area that turns red when the limit is reached.
+36. Use a browser confirmation dialog (`beforeunload`) to warn users about unsaved changes on the AI Generator page.
+37. Use a modal dialog for editing questions on the "My Questions" page.
+38. Use an `AlertDialog` component for delete confirmation, with a title, descriptive message, and "Cancel"/"Delete" buttons.
+39. Use a "Select All" checkbox with indeterminate state support for selecting/deselecting AI-generated questions.
+40. On the "My Questions" list, hide answers by default within a `Collapsible` or `Accordion` component for each question.
+41. Use the simple, single-column shadcn/ui blocks for the Login (`login-01`) and Sign Up (`signup-01`) pages, without SSO.
+42. After successful registration, redirect to a page instructing the user to check their email for verification.
+43. After successful email verification, redirect to the login page and display a success `Toast`.
+44. If an API request returns `401 Unauthorized`, automatically redirect to the login page and display a `Toast` explaining the session has expired.
     </matched_recommendations>
     <ui_architecture_planning_summary>
+
 ### 1. Main UI Architecture Requirements
+
 The application will be a responsive, mobile-first SPA built with Astro and React. The UI will be constructed using `shadcn/ui` components to ensure consistency and accessibility. Key architectural patterns include modal dialogs for focused tasks (Add/Edit Question), skeleton loaders for asynchronous data fetching, and `Toast` notifications for user feedback. State management will be handled within React components, with client-side validation using Zod before making API calls. For handling forms, use react-hook-form integrated with Zod for schema validation.
 
 ### 2. Key Views, Screens, and User Flows
--   **Authentication Flow**:
-    -   **Sign Up Page**: Simple form (`signup-01` block) for email/password. Redirects to a "Check your email" page.
-    -   **Login Page**: Simple form (`login-01` block) for email/password. Links to Sign Up and Forgot Password.
-    -   **Email Verification**: User clicks a link, is redirected to the Login page with a success `Toast`.
-    -   **Forgot Password Flow**: A page to enter an email, a confirmation page, and a Reset Password page with a form for the new password.
--   **Main Application Flow**:
-    -   **My Questions Page**: The main view. Displays a list of user's questions. Features search, an "Add Question" button, and a "Load More" button for pagination. Each question is a `Collapsible` item showing the answer on expansion, with "Edit" and "Delete" actions.
-    -   **AI Generator Page**: A responsive two-column (desktop) or stacked (mobile) layout. Contains a `Textarea` for the job description and a results area. Generated questions appear in a list with a "Select All" checkbox. Selected questions are editable within `Textarea` components.
--   **Modals & Dialogs**:
-    -   **Add/Edit Question Modal**: A form with `Textarea` for question (required) and answer (optional), plus "Save" and "Cancel" buttons.
-    -   **Delete Confirmation Dialog**: An `AlertDialog` to prevent accidental deletion.
+
+- **Authentication Flow**:
+  - **Sign Up Page**: Simple form (`signup-01` block) for email/password. Redirects to a "Check your email" page.
+  - **Login Page**: Simple form (`login-01` block) for email/password. Links to Sign Up and Forgot Password.
+  - **Email Verification**: User clicks a link, is redirected to the Login page with a success `Toast`.
+  - **Forgot Password Flow**: A page to enter an email, a confirmation page, and a Reset Password page with a form for the new password.
+- **Main Application Flow**:
+  - **My Questions Page**: The main view. Displays a list of user's questions. Features search, an "Add Question" button, and a "Load More" button for pagination. Each question is a `Collapsible` item showing the answer on expansion, with "Edit" and "Delete" actions.
+  - **AI Generator Page**: A responsive two-column (desktop) or stacked (mobile) layout. Contains a `Textarea` for the job description and a results area. Generated questions appear in a list with a "Select All" checkbox. Selected questions are editable within `Textarea` components.
+- **Modals & Dialogs**:
+  - **Add/Edit Question Modal**: A form with `Textarea` for question (required) and answer (optional), plus "Save" and "Cancel" buttons.
+  - **Delete Confirmation Dialog**: An `AlertDialog` to prevent accidental deletion.
 
 ### 3. API Integration and State Management
--   **State Management**: Local React state will manage form data, loading states, and UI flags (e.g., `isEdited`). Client-side validation will be implemented to prevent invalid API calls.
--   **API Interaction**:
-    -   All authenticated requests will include a JWT in the `Authorization` header.
-    -   Form submission buttons will enter a loading state and be disabled during API calls.
-    -   `GET /api/questions`: Used for the main list, with `search` and `page` query params for filtering and pagination.
-    -   `POST /api/ai/generate-questions`: Called from the AI Generator page. The UI will show a loading state during generation.
-    -   `POST /api/ai/save-questions`: Called to save selected questions. The frontend will track the `edited` state for each question. On success, the app redirects to the "My Questions" page.
-    -   `PATCH /api/questions/{id}` & `POST /api/questions`: Handled via the Add/Edit modal.
-    -   `DELETE /api/questions/{id}`: Called after user confirmation in the `AlertDialog`.
+
+- **State Management**: Local React state will manage form data, loading states, and UI flags (e.g., `isEdited`). Client-side validation will be implemented to prevent invalid API calls.
+- **API Interaction**:
+  - All authenticated requests will include a JWT in the `Authorization` header.
+  - Form submission buttons will enter a loading state and be disabled during API calls.
+  - `GET /api/questions`: Used for the main list, with `search` and `page` query params for filtering and pagination.
+  - `POST /api/ai/generate-questions`: Called from the AI Generator page. The UI will show a loading state during generation.
+  - `POST /api/ai/save-questions`: Called to save selected questions. The frontend will track the `edited` state for each question. On success, the app redirects to the "My Questions" page.
+  - `PATCH /api/questions/{id}` & `POST /api/questions`: Handled via the Add/Edit modal.
+  - `DELETE /api/questions/{id}`: Called after user confirmation in the `AlertDialog`.
 
 ### 4. Responsiveness, Accessibility, and Security
--   **Responsiveness**: The app is mobile-first. Key responsive elements include the main header (hamburger menu on mobile) and the AI Generator page layout (stacks on mobile).
--   **Accessibility**: Focus management is defined (e.g., returning focus after a modal closes). `aria-label` will be used where needed. Form fields will be clearly marked as required or optional.
--   **Security**: Session management is handled via JWTs. A `401` response triggers a redirect to the login page. Client-side validation prevents submission of invalid data.
+
+- **Responsiveness**: The app is mobile-first. Key responsive elements include the main header (hamburger menu on mobile) and the AI Generator page layout (stacks on mobile).
+- **Accessibility**: Focus management is defined (e.g., returning focus after a modal closes). `aria-label` will be used where needed. Form fields will be clearly marked as required or optional.
+- **Security**: Session management is handled via JWTs. A `401` response triggers a redirect to the login page. Client-side validation prevents submission of invalid data.
 
 </ui_architecture_planning_summary>
 <unresolved_issues>
--   The exact content and branding for emails (verification, password reset) are to be determined, as this is handled by Supabase.
-    </unresolved_issues>
-    </conversation_summary>
+
+- The exact content and branding for emails (verification, password reset) are to be determined, as this is handled by Supabase.
+  </unresolved_issues>
+  </conversation_summary>

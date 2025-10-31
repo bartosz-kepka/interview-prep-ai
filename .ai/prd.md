@@ -8,6 +8,7 @@ Wersja: 1.0 (MVP)
 InterviewPrep AI to aplikacja internetowa zaprojektowana, aby pomóc kandydatom w skutecznym przygotowaniu się do rozmów kwalifikacyjnych. Aplikacja rozwiązuje problem marnowania czasu na naukę odpowiedzi na generyczne pytania, umożliwiając generowanie spersonalizowanego zestawu pytań bezpośrednio z treści konkretnego ogłoszenia o pracę.
 
 Główne funkcjonalności w wersji MVP obejmują:
+
 - Ręczne zarządzanie (tworzenie, odczyt, aktualizacja, usuwanie) pytaniami i odpowiedziami.
 - Automatyczne generowanie pytań rekrutacyjnych przez AI na podstawie wklejonej treści ogłoszenia.
 - Prosty system kont użytkowników do bezpiecznego przechowywania danych.
@@ -21,6 +22,7 @@ Kandydaci do pracy często przygotowują się do rozmów w oparciu o ogólnodost
 ## 3. Wymagania funkcjonalne
 
 ### 3.1. System Kont Użytkownika
+
 - Użytkownik może zarejestrować się w systemie podając adres e-mail i hasło.
 - Po rejestracji wymagana jest weryfikacja adresu e-mail poprzez kliknięcie w link wysłany na podany adres.
 - Użytkownik może zalogować się do aplikacji przy użyciu swojego e-maila i hasła.
@@ -28,6 +30,7 @@ Kandydaci do pracy często przygotowują się do rozmów w oparciu o ogólnodost
 - Niezalogowany użytkownik nie ma dostępu do funkcji zarządzania pytaniami ani generatora AI.
 
 ### 3.2. Zarządzanie Pytaniami (CRUD)
+
 - Użytkownik może ręcznie dodać nowe pytanie wraz z własną odpowiedzią.
 - Użytkownik może przeglądać listę wszystkich swoich zapisanych pytań. Nowo dodane pytania pojawiają się na górze listy.
 - Użytkownik może edytować treść istniejących pytań i odpowiedzi.
@@ -35,6 +38,7 @@ Kandydaci do pracy często przygotowują się do rozmów w oparciu o ogólnodost
 - Pola do wprowadzania pytań i odpowiedzi to proste pola tekstowe bez opcji formatowania.
 
 ### 3.3. Generator Pytań AI
+
 - Dostępny jest dedykowany widok do generowania pytań.
 - Użytkownik może wkleić treść ogłoszenia o pracę w pole tekstowe (limit 10 000 znaków).
 - Po wklejeniu tekstu i uruchomieniu generatora, AI analizuje treść i zwraca listę 10-15 sugerowanych pytań.
@@ -44,6 +48,7 @@ Kandydaci do pracy często przygotowują się do rozmów w oparciu o ogólnodost
 - Po zapisaniu wybrane pytania są dodawane do głównej listy pytań użytkownika z oznaczeniem źródła jako "AI".
 
 ### 3.4. Wyszukiwanie i Interfejs
+
 - Na głównej liście pytań znajduje się pole wyszukiwania.
 - Wyszukiwanie filtruje listę pytań w czasie rzeczywistym.
 - Wyszukiwanie jest niewrażliwe na wielkość liter i obejmuje wyłącznie treść pytań.
@@ -52,6 +57,7 @@ Kandydaci do pracy często przygotowują się do rozmów w oparciu o ogólnodost
 ## 4. Granice produktu
 
 Następujące funkcjonalności celowo NIE wchodzą w zakres wersji MVP:
+
 - Kategoryzacja pytań, tworzenie folderów, "sesji rekrutacyjnych" czy zestawów.
 - Ocena jakości odpowiedzi użytkownika przez AI.
 - Symulacje rozmów kwalifikacyjnych w czasie rzeczywistym.

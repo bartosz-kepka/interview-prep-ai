@@ -1,102 +1,58 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   type LoginInput,
   type SignUpInput,
   type ForgotPasswordInput,
   type ResetPasswordInput,
-} from '@/lib/auth/validation';
-
-type ApiError = {
-  error: string;
-  fields?: Record<string, string>;
-  code?: string;
-};
-
-type AuthResponse = {
-  message?: string;
-};
+} from "@/lib/auth/validation";
+import { useApi, type ApiError } from "./useApi";
 
 export const useAuth = () => {
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { post, isSubmitting } = useApi();
+  const [error, setError] = useState<ApiError | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const handleApiCall = async <T>(
-    endpoint: string,
-    data: T,
-    setFormErrors: (errors: Record<string, string>) => void
-  ): Promise<AuthResponse | void> => {
-    setIsSubmitting(true);
-    setApiError(null);
+  const handleAuthRequest = async <T, U>(endpoint: string, data: T, onSuccess?: (data: U) => void) => {
+    setError(null);
     setSuccessMessage(null);
+    const { data: responseData, error: responseError } = await post<U, T>(endpoint, data);
 
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        if (result.fields) {
-          setFormErrors(result.fields);
-        } else if (result.code === 'EMAIL_NOT_CONFIRMED') {
-          window.location.href = '/check-email';
-        } else {
-          setApiError(result.error || 'An error occurred.');
-        }
+    if (responseError) {
+      if (responseError.code === "EMAIL_NOT_CONFIRMED") {
+        window.location.href = "/check-email";
         return;
       }
-      return result;
-    } catch (error) {
-      setApiError('Network error. Please check your connection and try again.');
-    } finally {
-      setIsSubmitting(false);
+      setError(responseError);
+      return { error: responseError };
     }
+
+    if (onSuccess && responseData) {
+      onSuccess(responseData);
+    }
+    return { data: responseData };
   };
 
-  const login = async (
-    data: LoginInput,
-    setFormErrors: (errors: Record<string, string>) => void
-  ) => {
-    const result = await handleApiCall('/api/auth/login', data, setFormErrors);
-    if (result) {
+  const login = async (data: LoginInput) => {
+    return handleAuthRequest("/api/auth/login", data, () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const redirectTo = urlParams.get('redirect') || '/';
-      window.location.href = redirectTo;
-    }
+      window.location.href = urlParams.get("redirect") || "/";
+    });
   };
 
-  const signup = async (
-    data: SignUpInput,
-    setFormErrors: (errors: Record<string, string>) => void
-  ) => {
-    const result = await handleApiCall('/api/auth/signup', data, setFormErrors);
-    if (result) {
-      window.location.href = '/check-email';
-    }
+  const signup = async (data: SignUpInput) => {
+    return handleAuthRequest("/api/auth/signup", data, () => {
+      window.location.href = "/check-email";
+    });
   };
 
-  const forgotPassword = async (
-    data: ForgotPasswordInput,
-    setFormErrors: (errors: Record<string, string>) => void
-  ) => {
-    const result = await handleApiCall('/api/auth/reset-password', data, setFormErrors);
-    if (result) {
-      setSuccessMessage(result.message || 'Password reset link sent.');
-    }
+  const forgotPassword = async (data: ForgotPasswordInput) => {
+    return handleAuthRequest("/api/auth/reset-password", data);
   };
 
-  const resetPassword = async (
-    data: ResetPasswordInput,
-    setFormErrors: (errors: Record<string, string>) => void
-  ) => {
-    const result = await handleApiCall('/api/auth/update-password', data, setFormErrors);
-    if (result) {
-      window.location.href = '/';
-    }
+  const resetPassword = async (data: ResetPasswordInput) => {
+    return handleAuthRequest("/api/auth/update-password", data, () => {
+      window.location.href = "/";
+    });
   };
 
   return {
@@ -105,7 +61,7 @@ export const useAuth = () => {
     forgotPassword,
     resetPassword,
     isSubmitting,
-    apiError,
+    error,
     successMessage,
   };
 };

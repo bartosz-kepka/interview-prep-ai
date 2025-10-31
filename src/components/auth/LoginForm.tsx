@@ -1,38 +1,38 @@
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { loginSchema, type LoginInput } from "@/lib/auth/validation"
-import { useAuth } from "@/components/hooks/useAuth"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginInput } from "@/lib/auth/validation";
+import { useAuth } from "@/components/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const LoginForm: React.FC = () => {
-  const { login, isSubmitting, apiError } = useAuth()
+  const { login, isSubmitting } = useAuth();
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-  })
+  });
+  const [apiError, setApiError] = React.useState<string | null>(null);
 
-  const onSubmit = (values: LoginInput) => {
-    login(values, (errors) => {
-      Object.entries(errors).forEach(([field, message]) => {
-        form.setError(field as keyof LoginInput, { type: "manual", message })
-      })
-    })
-  }
-
+  const onSubmit = async (values: LoginInput) => {
+    const result = await login(values);
+    if (result.error) {
+      setApiError(result.error.error);
+    }
+    if (result.error?.fields) {
+      Object.entries(result.error.fields).forEach(([field, message]) => {
+        form.setError(field as keyof LoginInput, {
+          type: "manual",
+          message: message as string,
+        });
+      });
+    }
+  };
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -83,9 +83,9 @@ export const LoginForm: React.FC = () => {
         />
 
         <Button type="submit" disabled={isSubmitting} className="w-full" data-test-id="login-submit-button">
-          {isSubmitting ? 'Logging in...' : 'Log In'}
+          {isSubmitting ? "Logging in..." : "Log In"}
         </Button>
       </form>
     </Form>
-  )
-}
+  );
+};

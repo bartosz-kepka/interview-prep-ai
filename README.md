@@ -27,6 +27,7 @@ InterviewPrep AI is a web application designed to help job candidates effectivel
 To set up and run this project on your local machine, follow these steps:
 
 1.  **Clone the repository:**
+
     ```bash
     git clone https://github.com/your-username/interview-prep-ai.git
     cd interview-prep-ai
@@ -34,17 +35,20 @@ To set up and run this project on your local machine, follow these steps:
 
 2.  **Set the Node.js version:**
     The project requires Node.js version `22.14.0`. We recommend using a version manager like `nvm`.
+
     ```bash
     nvm use
     ```
 
 3.  **Install dependencies:**
+
     ```bash
     npm install
     ```
 
 4.  **Set up environment variables:**
     Create a `.env` file in the root of the project and add the necessary environment variables for Supabase and Openrouter.ai.
+
     ```env
     # Supabase
     PUBLIC_SUPABASE_URL="your-supabase-url"

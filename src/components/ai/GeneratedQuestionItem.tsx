@@ -1,8 +1,8 @@
-import React, { useId } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Checkbox } from '../ui/checkbox';
-import { Textarea } from '../ui/textarea';
-import type { QuestionProposalViewModel } from '../../types';
+import React, { useId } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Checkbox } from "../ui/checkbox";
+import { Textarea } from "../ui/textarea";
+import type { QuestionProposalViewModel } from "../../types";
 
 interface GeneratedQuestionItemProps {
   question: QuestionProposalViewModel;

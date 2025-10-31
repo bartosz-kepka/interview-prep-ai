@@ -22,4 +22,3 @@ Kandydaci tracą czas i energię na przygotowania do rozmów w oparciu o generyc
 
 - 80% zarejestrowanych użytkowników dodaje do swojej bazy co najmniej 5 pytań (ręcznie lub przy pomocy AI).
 - Co najmniej 50% pytań w bazach użytkowników pochodzi z generatora AI. To potwierdzi, że kluczowa funkcja inteligentna jest wartościowa i chętnie wykorzystywana.
-

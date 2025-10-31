@@ -1,18 +1,18 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
-import { LoginForm } from '@/components/auth/LoginForm';
-import '@testing-library/jest-dom';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
+import { LoginForm } from "@/components/auth/LoginForm";
+import "@testing-library/jest-dom";
 
 // Mock the loginSchema for simplicity in tests, focusing on component behavior
-vi.mock('@/lib/auth/validation', () => ({
+vi.mock("@/lib/auth/validation", () => ({
   loginSchema: {
     safeParse: (data: any) => {
-      if (!data.email || !data.email.includes('@')) {
+      if (!data.email || !data.email.includes("@")) {
         return {
           success: false,
           error: {
-            errors: [{ path: ['email'], message: 'Invalid email' }],
+            errors: [{ path: ["email"], message: "Invalid email" }],
           },
         };
       }
@@ -20,7 +20,7 @@ vi.mock('@/lib/auth/validation', () => ({
         return {
           success: false,
           error: {
-            errors: [{ path: ['password'], message: 'Password too short' }],
+            errors: [{ path: ["password"], message: "Password too short" }],
           },
         };
       }
@@ -29,7 +29,7 @@ vi.mock('@/lib/auth/validation', () => ({
   },
 }));
 
-describe('LoginForm', () => {
+describe("LoginForm", () => {
   const user = userEvent.setup();
 
   // Mock window.location.href
@@ -38,7 +38,7 @@ describe('LoginForm', () => {
     // @ts-ignore
     delete window.location;
     // @ts-ignore
-    window.location = { href: '' };
+    window.location = { href: "" };
 
     // Mock fetch
     global.fetch = vi.fn();
@@ -49,29 +49,29 @@ describe('LoginForm', () => {
     vi.restoreAllMocks();
   });
 
-  it('should render email, password inputs and a submit button', () => {
+  it("should render email, password inputs and a submit button", () => {
     render(<LoginForm />);
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /log in/i })).toBeInTheDocument();
   });
 
-  it('should show client-side validation errors for invalid email', async () => {
+  it("should show client-side validation errors for invalid email", async () => {
     render(<LoginForm />);
-    await user.type(screen.getByLabelText(/email/i), 'invalid-email');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
+    await user.type(screen.getByLabelText(/email/i), "invalid-email");
+    await user.click(screen.getByRole("button", { name: /log in/i }));
 
-    expect(await screen.findByText('Invalid email')).toBeInTheDocument();
+    expect(await screen.findByText("Invalid email")).toBeInTheDocument();
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
-  it('should show client-side validation errors for short password', async () => {
+  it("should show client-side validation errors for short password", async () => {
     render(<LoginForm />);
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/password/i), '123');
-    fireEvent.click(screen.getByRole('button', { name: /log in/i }));
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "123");
+    fireEvent.click(screen.getByRole("button", { name: /log in/i }));
 
-    expect(await screen.findByText('Password too short')).toBeInTheDocument();
+    expect(await screen.findByText("Password too short")).toBeInTheDocument();
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
@@ -82,29 +82,29 @@ describe('LoginForm', () => {
     });
 
     render(<LoginForm />);
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /log in/i }));
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'test@example.com', password: 'password123' }),
+      expect(global.fetch).toHaveBeenCalledWith("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "test@example.com", password: "password123" }),
       });
     });
 
     await waitFor(() => {
-      expect(window.location.href).toBe('/');
+      expect(window.location.href).toBe("/");
     });
   });
 
-  it('should redirect to the provided redirect URL on successful login', async () => {
+  it("should redirect to the provided redirect URL on successful login", async () => {
     // Set search params for the test
-    Object.defineProperty(window, 'location', {
+    Object.defineProperty(window, "location", {
       value: {
-        href: 'http://localhost/login?redirect=/dashboard',
-        search: '?redirect=/dashboard',
+        href: "http://localhost/login?redirect=/dashboard",
+        search: "?redirect=/dashboard",
       },
       writable: true,
     });
@@ -115,76 +115,74 @@ describe('LoginForm', () => {
     });
 
     render(<LoginForm />);
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /log in/i }));
 
     await waitFor(() => {
-      expect(window.location.href).toBe('/dashboard');
+      expect(window.location.href).toBe("/dashboard");
     });
   });
 
-  it('should display a general API error message on failure', async () => {
+  it("should display a general API error message on failure", async () => {
     (global.fetch as vi.Mock).mockResolvedValue({
       ok: false,
       status: 500,
-      json: () => Promise.resolve({ error: 'Internal Server Error' }),
+      json: () => Promise.resolve({ error: "Internal Server Error" }),
     });
 
     render(<LoginForm />);
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /log in/i }));
 
-    expect(await screen.findByText('Internal Server Error')).toBeInTheDocument();
+    expect(await screen.findByText("Internal Server Error")).toBeInTheDocument();
   });
 
-  it('should display field-specific errors from the API', async () => {
+  it("should display field-specific errors from the API", async () => {
     (global.fetch as vi.Mock).mockResolvedValue({
       ok: false,
       status: 422,
       json: () =>
         Promise.resolve({
-          fields: { email: 'This email is already taken' },
+          fields: { email: "This email is already taken" },
         }),
     });
 
     render(<LoginForm />);
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /log in/i }));
 
-    expect(await screen.findByText('This email is already taken')).toBeInTheDocument();
+    expect(await screen.findByText("This email is already taken")).toBeInTheDocument();
   });
 
-  it('should redirect to /check-email when API returns EMAIL_NOT_CONFIRMED code', async () => {
+  it("should redirect to /check-email when API returns EMAIL_NOT_CONFIRMED code", async () => {
     (global.fetch as vi.Mock).mockResolvedValue({
       ok: false,
       status: 400,
-      json: () => Promise.resolve({ code: 'EMAIL_NOT_CONFIRMED' }),
+      json: () => Promise.resolve({ code: "EMAIL_NOT_CONFIRMED" }),
     });
 
     render(<LoginForm />);
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /log in/i }));
 
     await waitFor(() => {
-      expect(window.location.href).toBe('/check-email');
+      expect(window.location.href).toBe("/check-email");
     });
   });
 
-  it('should display a network error message if fetch fails', async () => {
-    (global.fetch as vi.Mock).mockRejectedValue(new TypeError('Failed to fetch'));
+  it("should display a network error message if fetch fails", async () => {
+    (global.fetch as vi.Mock).mockRejectedValue(new TypeError("Failed to fetch"));
 
     render(<LoginForm />);
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    await user.click(screen.getByRole('button', { name: /log in/i }));
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /log in/i }));
 
-    expect(
-      await screen.findByText('Network error. Please check your connection and try again.')
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Network error. Please check your connection and try again.")).toBeInTheDocument();
   });
 
   it('should disable form elements and show "Logging in..." during submission', async () => {
@@ -196,12 +194,12 @@ describe('LoginForm', () => {
     (global.fetch as vi.Mock).mockReturnValue(fetchPromise);
 
     render(<LoginForm />);
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.type(screen.getByLabelText(/password/i), 'password123');
-    fireEvent.click(screen.getByRole('button', { name: /log in/i }));
+    await user.type(screen.getByLabelText(/email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    fireEvent.click(screen.getByRole("button", { name: /log in/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /logging in.../i })).toBeDisabled();
+      expect(screen.getByRole("button", { name: /logging in.../i })).toBeDisabled();
     });
     expect(screen.getByLabelText(/email/i)).toBeDisabled();
     expect(screen.getByLabelText(/password/i)).toBeDisabled();
@@ -210,8 +208,7 @@ describe('LoginForm', () => {
     resolveFetch!({ ok: true, json: () => Promise.resolve({}) });
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /log in/i })).toBeEnabled();
+      expect(screen.getByRole("button", { name: /log in/i })).toBeEnabled();
     });
   });
 });
-

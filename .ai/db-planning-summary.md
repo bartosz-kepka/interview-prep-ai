@@ -1,5 +1,6 @@
 <conversation_summary>
 <decisions>
+
 1.  Dla wersji MVP nie będzie tworzona osobna tabela `profiles`. Dane użytkownika będą ograniczone do tych przechowywanych w tabeli `auth.users` Supabase.
 2.  Kolumny `question` i `answer` w tabeli `questions` będą miały typ `VARCHAR(10000)`.
 3.  Do śledzenia pochodzenia pytania zostanie użyty typ `ENUM` (`question_source`) z wartościami: `'user'`, `'ai'` i `'ai-edited'`.
@@ -21,6 +22,7 @@
     </decisions>
 
 <matched_recommendations>
+
 1.  Utworzenie dedykowanej tabeli `ai_generation_logs` do śledzenia prób generowania pytań przez AI i logowania błędów.
 2.  Zdefiniowanie kolumn `prompt` i `response` jako `VARCHAR(100000)` oraz `finished_at` jako `TIMESTAMPTZ` w tabeli `ai_generation_logs`.
 3.  Zdefiniowanie kolumny `prompt` jako `NOT NULL` w celu zapewnienia kompletności logów.
@@ -42,34 +44,37 @@ Na podstawie przeprowadzonej dyskusji zaplanowano schemat bazy danych PostgreSQL
 Schemat będzie wspierał podstawowe funkcjonalności CRUD dla pytań i odpowiedzi, system uwierzytelniania użytkowników oraz logowanie akcji generowania pytań przez AI z możliwością powiązania wygenerowanego pytania z konkretnym logiem. Baza danych musi zapewniać izolację danych pomiędzy użytkownikami oraz być zoptymalizowana pod kątem kluczowych operacji.
 
 **Kluczowe encje i ich relacje:**
--   **`auth.users`**: Tabela dostarczana przez Supabase, przechowująca dane uwierzytelniające użytkowników. Służy jako główna tabela użytkowników.
--   **`questions`**: Główna tabela aplikacji przechowująca pytania i odpowiedzi.
-    -   `id` (UUID, Klucz główny)
-    -   `user_id` (UUID, Klucz obcy do `auth.users.id` z `ON DELETE CASCADE`)
-    -   `generation_log_id` (UUID, Klucz obcy do `ai_generation_logs.id` z `ON DELETE SET NULL`, Nullable)
-    -   `question` (VARCHAR(10000), Not Null)
-    -   `answer` (VARCHAR(10000), Nullable)
-    -   `source` (ENUM `question_source` z wartościami `'user'`, `'ai'`, `'ai-edited'`)
-    -   `created_at` (TIMESTAMPTZ, domyślnie `now()`)
-    -   `updated_at` (TIMESTAMPTZ)
--   **`ai_generation_logs`**: Tabela do logowania operacji generowania pytań przez AI.
-    -   `id` (UUID, Klucz główny)
-    -   `user_id` (UUID, Klucz obcy do `auth.users.id` z `ON DELETE CASCADE`)
-    -   `created_at` (TIMESTAMPTZ, domyślnie `now()`)
-    -   `finished_at` (TIMESTAMPTZ, Nullable)
-    -   `status` (ENUM `generation_status` (`'success'`, `'error'`), Nullable)
-    -   `prompt` (VARCHAR(100000), Not Null)
-    -   `response` (VARCHAR(100000), Nullable)
-    -   `error_details` (TEXT, Nullable)
+
+- **`auth.users`**: Tabela dostarczana przez Supabase, przechowująca dane uwierzytelniające użytkowników. Służy jako główna tabela użytkowników.
+- **`questions`**: Główna tabela aplikacji przechowująca pytania i odpowiedzi.
+  - `id` (UUID, Klucz główny)
+  - `user_id` (UUID, Klucz obcy do `auth.users.id` z `ON DELETE CASCADE`)
+  - `generation_log_id` (UUID, Klucz obcy do `ai_generation_logs.id` z `ON DELETE SET NULL`, Nullable)
+  - `question` (VARCHAR(10000), Not Null)
+  - `answer` (VARCHAR(10000), Nullable)
+  - `source` (ENUM `question_source` z wartościami `'user'`, `'ai'`, `'ai-edited'`)
+  - `created_at` (TIMESTAMPTZ, domyślnie `now()`)
+  - `updated_at` (TIMESTAMPTZ)
+- **`ai_generation_logs`**: Tabela do logowania operacji generowania pytań przez AI.
+  - `id` (UUID, Klucz główny)
+  - `user_id` (UUID, Klucz obcy do `auth.users.id` z `ON DELETE CASCADE`)
+  - `created_at` (TIMESTAMPTZ, domyślnie `now()`)
+  - `finished_at` (TIMESTAMPTZ, Nullable)
+  - `status` (ENUM `generation_status` (`'success'`, `'error'`), Nullable)
+  - `prompt` (VARCHAR(100000), Not Null)
+  - `response` (VARCHAR(100000), Nullable)
+  - `error_details` (TEXT, Nullable)
 
 Relacje między tabelami to:
--   `auth.users` -> `questions` (jeden-do-wielu)
--   `auth.users` -> `ai_generation_logs` (jeden-do-wielu)
--   `ai_generation_logs` -> `questions` (jeden-do-wielu, opcjonalna)
+
+- `auth.users` -> `questions` (jeden-do-wielu)
+- `auth.users` -> `ai_generation_logs` (jeden-do-wielu)
+- `ai_generation_logs` -> `questions` (jeden-do-wielu, opcjonalna)
 
 **Kwestie bezpieczeństwa i skalowalności:**
--   **Bezpieczeństwo**: Dostęp do danych w tabelach `questions` i `ai_generation_logs` będzie chroniony przez polityki RLS, zapewniając, że użytkownicy mają dostęp wyłącznie do swoich zasobów. Użycie `UUID` jako kluczy głównych zapobiega próbom odgadywania identyfikatorów.
--   **Skalowalność**: Zastosowanie odpowiednich indeksów (na `user_id`, `created_at` oraz trigramowego na `question`) zapewni wysoką wydajność zapytań. Świadomie zrezygnowano z indeksu na `generation_log_id` dla MVP, akceptując potencjalnie niższą wydajność zapytań filtrujących po tym kluczu. Użycie typu `VARCHAR` z limitem dla pól tekstowych (`prompt`, `response`) stanowi zabezpieczenie przed nadmiernym zużyciem miejsca na dysku. Brak polityki retencji danych dla logów jest akceptowalny dla MVP, ale może wymagać wdrożenia w przyszłości.
+
+- **Bezpieczeństwo**: Dostęp do danych w tabelach `questions` i `ai_generation_logs` będzie chroniony przez polityki RLS, zapewniając, że użytkownicy mają dostęp wyłącznie do swoich zasobów. Użycie `UUID` jako kluczy głównych zapobiega próbom odgadywania identyfikatorów.
+- **Skalowalność**: Zastosowanie odpowiednich indeksów (na `user_id`, `created_at` oraz trigramowego na `question`) zapewni wysoką wydajność zapytań. Świadomie zrezygnowano z indeksu na `generation_log_id` dla MVP, akceptując potencjalnie niższą wydajność zapytań filtrujących po tym kluczu. Użycie typu `VARCHAR` z limitem dla pól tekstowych (`prompt`, `response`) stanowi zabezpieczenie przed nadmiernym zużyciem miejsca na dysku. Brak polityki retencji danych dla logów jest akceptowalny dla MVP, ale może wymagać wdrożenia w przyszłości.
 
 Wszystkie kluczowe aspekty niezbędne do stworzenia początkowego skryptu migracji bazy danych zostały omówione i uzgodnione.
 </database_planning_summary>

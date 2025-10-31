@@ -15,7 +15,7 @@ The service's constructor will initialize a new instance with the necessary conf
 ```typescript
 class OpenRouterService {
   private readonly apiKey: string;
-  private readonly baseUrl: string = 'https://openrouter.ai/api/v1';
+  private readonly baseUrl: string = "https://openrouter.ai/api/v1";
 
   /**
    * @param apiKey The API key for OpenRouter.
@@ -23,7 +23,7 @@ class OpenRouterService {
    */
   constructor(apiKey: string) {
     if (!apiKey) {
-      throw new Error('OpenRouter API key is required.');
+      throw new Error("OpenRouter API key is required.");
     }
     this.apiKey = apiKey;
   }
@@ -34,7 +34,7 @@ class OpenRouterService {
 
 ```typescript
 // Example in an Astro API route or service
-import { OpenRouterService } from '@/lib/ai/openrouter.service';
+import { OpenRouterService } from "@/lib/ai/openrouter.service";
 
 const openRouterApiKey = import.meta.env.OPENROUTER_API_KEY;
 const openRouterService = new OpenRouterService(openRouterApiKey);
@@ -50,32 +50,32 @@ This method sends a request to the OpenRouter API and returns a validated, struc
 
 **Parameters (`GenerateOptions<T>`):**
 
--   `systemMessage` (string): The system prompt to guide the model's behavior.
--   `userMessage` (string): The user's input or query.
--   `schema` (T): A Zod schema (`z.object(...)`) that defines the expected structure of the JSON response.
--   `model` (string, optional): The name of the model to use (e.g., `"anthropic/claude-3.5-sonnet"`). Defaults to a project-wide standard.
--   `params` (object, optional): Additional model parameters like `temperature`, `max_tokens`, etc.
+- `systemMessage` (string): The system prompt to guide the model's behavior.
+- `userMessage` (string): The user's input or query.
+- `schema` (T): A Zod schema (`z.object(...)`) that defines the expected structure of the JSON response.
+- `model` (string, optional): The name of the model to use (e.g., `"anthropic/claude-3.5-sonnet"`). Defaults to a project-wide standard.
+- `params` (object, optional): Additional model parameters like `temperature`, `max_tokens`, etc.
 
 **Returns:** A `Promise` that resolves to an object of the type inferred from the provided Zod schema.
 
 **Example Usage:**
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 const QuestionsSchema = z.object({
   questions: z.array(
     z.object({
-      question: z.string().describe('The generated interview question.'),
+      question: z.string().describe("The generated interview question."),
     })
   ),
 });
 
 const response = await openRouterService.generateStructuredResponse({
-  systemMessage: 'You are an expert interviewer. Generate technical questions based on the user\'s input.',
-  userMessage: 'The user has experience with React and PostgreSQL.',
+  systemMessage: "You are an expert interviewer. Generate technical questions based on the user's input.",
+  userMessage: "The user has experience with React and PostgreSQL.",
   schema: QuestionsSchema,
-  model: 'anthropic/claude-3.5-sonnet',
+  model: "anthropic/claude-3.5-sonnet",
 });
 
 // `response` is now a typesafe object: { questions: [{ question: string }] }
@@ -94,7 +94,7 @@ This private method will be responsible for constructing the final request body 
 1.  **System Message:** The `systemMessage` will be placed in the `messages` array as the first object with `role: 'system'`.
 2.  **User Message:** The `userMessage` will follow as the second object with `role: 'user'`.
 3.  **Structured Response Format (`response_format`):** The Zod schema will be converted into a JSON schema and embedded in the `response_format` field. This forces the model to return valid JSON.
-    -   The format will be: `{ type: 'json_schema', json_schema: { name: 'structured_response', strict: true, schema: [zod-to-json-schema-output] } }`
+    - The format will be: `{ type: 'json_schema', json_schema: { name: 'structured_response', strict: true, schema: [zod-to-json-schema-output] } }`
 4.  **Model and Parameters:** The `model` name and any additional `params` will be added to the top level of the payload.
 
 ### `_fetchWithTimeout(url: string, options: RequestInit, timeout: number): Promise<Response>`

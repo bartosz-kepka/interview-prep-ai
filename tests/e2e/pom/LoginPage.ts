@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 export class LoginPage {
   readonly page: Page;
@@ -16,16 +16,14 @@ export class LoginPage {
   }
 
   async goto(options?: { redirectTo?: string }) {
-    const url = options?.redirectTo
-      ? `/login?redirect=${encodeURIComponent(options.redirectTo)}`
-      : '/login';
+    const url = options?.redirectTo ? `/login?redirect=${encodeURIComponent(options.redirectTo)}` : "/login";
     await this.page.goto(url);
   }
 
   async login(email: string, password?: string) {
     // Wait for the submit button to be enabled, which indicates that the
     // form is fully hydrated and ready for interaction.
-    await this.submitButton.waitFor({ state: 'attached' });
+    await this.submitButton.waitFor({ state: "attached" });
 
     await this.emailInput.fill(email);
     if (password) {
@@ -34,4 +32,3 @@ export class LoginPage {
     await this.submitButton.click();
   }
 }
-

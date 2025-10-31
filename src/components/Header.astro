@@ -1,5 +1,5 @@
 ---
-import { LogoutButton } from './auth/LogoutButton';
+import { LogoutButton } from "./auth/LogoutButton";
 
 interface Props {
   user: {
@@ -18,9 +18,7 @@ const { user } = Astro.props;
         InterviewPrep AI
       </a>
       <nav class="hidden md:flex items-center gap-4">
-        <a href="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
-          Moje pytania
-        </a>
+        <a href="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors"> Moje pytania </a>
         <a href="/generator" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
           Generator
         </a>
@@ -35,4 +33,3 @@ const { user } = Astro.props;
     </div>
   </div>
 </header>
-

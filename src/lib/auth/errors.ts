@@ -1,12 +1,12 @@
-import type { AuthError } from '@supabase/supabase-js';
+import type { AuthError } from "@supabase/supabase-js";
 
 export type AuthErrorCode =
-  | 'EMAIL_NOT_CONFIRMED'
-  | 'INVALID_CREDENTIALS'
-  | 'USER_NOT_FOUND'
-  | 'USER_EXISTS'
-  | 'SIGNUP_FAILED'
-  | 'GENERIC_ERROR';
+  | "EMAIL_NOT_CONFIRMED"
+  | "INVALID_CREDENTIALS"
+  | "USER_NOT_FOUND"
+  | "USER_EXISTS"
+  | "SIGNUP_FAILED"
+  | "GENERIC_ERROR";
 
 export interface AuthErrorResponse {
   error: string;
@@ -20,33 +20,32 @@ export const mapAuthError = (error: AuthError): AuthErrorResponse => {
   const message = error.message.toLowerCase();
 
   // Invalid credentials
-  if (message.includes('invalid login credentials') || message.includes('invalid password')) {
+  if (message.includes("invalid login credentials") || message.includes("invalid password")) {
     return {
-      error: 'Invalid email or password',
-      code: 'INVALID_CREDENTIALS',
+      error: "Invalid email or password",
+      code: "INVALID_CREDENTIALS",
     };
   }
 
   // Email not confirmed
-  if (message.includes('email not confirmed') || message.includes('email_not_confirmed')) {
+  if (message.includes("email not confirmed") || message.includes("email_not_confirmed")) {
     return {
-      error: 'Please verify your email address before logging in',
-      code: 'EMAIL_NOT_CONFIRMED',
+      error: "Please verify your email address before logging in",
+      code: "EMAIL_NOT_CONFIRMED",
     };
   }
 
   // User not found
-  if (message.includes('user not found')) {
+  if (message.includes("user not found")) {
     return {
-      error: 'No account found with this email address',
-      code: 'USER_NOT_FOUND',
+      error: "No account found with this email address",
+      code: "USER_NOT_FOUND",
     };
   }
 
   // Generic fallback
   return {
-    error: 'Authentication failed. Please try again.',
-    code: 'GENERIC_ERROR',
+    error: "Authentication failed. Please try again.",
+    code: "GENERIC_ERROR",
   };
 };
-

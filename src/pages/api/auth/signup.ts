@@ -1,6 +1,6 @@
-import type { APIRoute } from 'astro';
-import { createSupabaseServerInstance } from '@/db/supabase.client';
-import { signUpSchema } from '@/lib/auth/validation';
+import type { APIRoute } from "astro";
+import { createSupabaseServerInstance } from "@/db/supabase.client";
+import { signUpSchema } from "@/lib/auth/validation";
 
 export const prerender = false;
 
@@ -10,10 +10,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     body = await request.json();
   } catch {
-    return new Response(
-      JSON.stringify({ error: 'Invalid request format' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: "Invalid request format" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   // Validate input with Zod
@@ -25,10 +25,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         fieldErrors[error.path[0] as string] = error.message;
       }
     });
-    return new Response(
-      JSON.stringify({ error: 'Validation failed', fields: fieldErrors }),
-      { status: 422, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: "Validation failed", fields: fieldErrors }), {
+      status: 422,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const { email, password } = validationResult.data;
@@ -45,29 +45,29 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     password,
     options: {
       emailRedirectTo: `${new URL(request.url).origin}/api/auth/callback`,
-    }
+    },
   });
 
   // Handle authentication errors
   if (error) {
     // Check for existing user
-    if (error.message.toLowerCase().includes('user already registered')) {
+    if (error.message.toLowerCase().includes("user already registered")) {
       return new Response(
         JSON.stringify({
-          error: 'An account with this email already exists',
-          code: 'USER_EXISTS'
+          error: "An account with this email already exists",
+          code: "USER_EXISTS",
         }),
-        { status: 409, headers: { 'Content-Type': 'application/json' } }
+        { status: 409, headers: { "Content-Type": "application/json" } }
       );
     }
 
     // Generic error
     return new Response(
       JSON.stringify({
-        error: error.message || 'Failed to create account',
-        code: 'SIGNUP_FAILED'
+        error: error.message || "Failed to create account",
+        code: "SIGNUP_FAILED",
       }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -75,13 +75,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   return new Response(
     JSON.stringify({
       success: true,
-      message: 'Please check your email to verify your account',
+      message: "Please check your email to verify your account",
       user: {
         id: data.user?.id,
         email: data.user?.email,
-      }
+      },
     }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
+    { status: 200, headers: { "Content-Type": "application/json" } }
   );
 };
-

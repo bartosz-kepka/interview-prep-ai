@@ -1,17 +1,14 @@
-import React, { useState, useId } from 'react';
-import { Button } from '../ui/button';
-import { Textarea } from '../ui/textarea';
+import React, { useState, useId } from "react";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
 
 interface GeneratorInputFormProps {
   onGenerate: (sourceText: string) => void;
   isGenerating: boolean;
 }
 
-export const GeneratorInputForm: React.FC<GeneratorInputFormProps> = ({
-  onGenerate,
-  isGenerating,
-}) => {
-  const [sourceText, setSourceText] = useState('');
+export const GeneratorInputForm: React.FC<GeneratorInputFormProps> = ({ onGenerate, isGenerating }) => {
+  const [sourceText, setSourceText] = useState("");
   const textareaId = useId();
   const counterId = useId();
 
@@ -43,9 +40,9 @@ export const GeneratorInputForm: React.FC<GeneratorInputFormProps> = ({
         <div id={counterId} className="mt-2 text-sm text-gray-600" aria-live="polite">
           {sourceText.length}/10000 characters
         </div>
-      <Button type="submit" disabled={isDisabled} className="w-full" data-test-id="generator-submit-button">
-        {isGenerating ? 'Generating...' : 'Generate Questions'}
-      </Button>
+        <Button type="submit" disabled={isDisabled} className="w-full" data-test-id="generator-submit-button">
+          {isGenerating ? "Generating..." : "Generate Questions"}
+        </Button>
       </div>
     </form>
   );

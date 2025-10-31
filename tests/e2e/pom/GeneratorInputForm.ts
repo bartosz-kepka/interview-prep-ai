@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 export class GeneratorInputForm {
   readonly page: Page;
@@ -16,4 +16,3 @@ export class GeneratorInputForm {
     await this.submitButton.click();
   }
 }
-

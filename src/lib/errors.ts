@@ -8,7 +8,7 @@
 export class BadGatewayError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'BadGatewayError';
+    this.name = "BadGatewayError";
   }
 }
 
@@ -18,7 +18,7 @@ export class BadGatewayError extends Error {
 export class InternalServerError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'InternalServerError';
+    this.name = "InternalServerError";
   }
 }
 
@@ -28,7 +28,7 @@ export class InternalServerError extends Error {
 export class NotFoundError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'NotFoundError';
+    this.name = "NotFoundError";
   }
 }
 
@@ -38,6 +38,6 @@ export class NotFoundError extends Error {
 export class UnprocessableEntityError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'UnprocessableEntityError';
+    this.name = "UnprocessableEntityError";
   }
 }

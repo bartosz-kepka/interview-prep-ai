@@ -1,7 +1,7 @@
-import type { APIRoute } from 'astro';
-import { createSupabaseServerInstance } from '@/db/supabase.client';
-import { loginSchema } from '@/lib/auth/validation';
-import { mapAuthError } from '@/lib/auth/errors';
+import type { APIRoute } from "astro";
+import { createSupabaseServerInstance } from "@/db/supabase.client";
+import { loginSchema } from "@/lib/auth/validation";
+import { mapAuthError } from "@/lib/auth/errors";
 
 export const prerender = false;
 
@@ -11,10 +11,10 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
   try {
     body = await request.json();
   } catch {
-    return new Response(
-      JSON.stringify({ error: 'Invalid request format' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: "Invalid request format" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   // Validate input with Zod
@@ -26,10 +26,10 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
         fieldErrors[error.path[0] as string] = error.message;
       }
     });
-    return new Response(
-      JSON.stringify({ error: 'Validation failed', fields: fieldErrors }),
-      { status: 422, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: "Validation failed", fields: fieldErrors }), {
+      status: 422,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const { email, password } = validationResult.data;
@@ -49,10 +49,7 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
   // Handle authentication errors with detailed messages
   if (error) {
     const authError = mapAuthError(error);
-    return new Response(
-      JSON.stringify(authError),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify(authError), { status: 401, headers: { "Content-Type": "application/json" } });
   }
 
   // Check if email is verified (additional check)
@@ -62,10 +59,10 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
 
     return new Response(
       JSON.stringify({
-        error: 'Please verify your email address before logging in',
-        code: 'EMAIL_NOT_CONFIRMED'
+        error: "Please verify your email address before logging in",
+        code: "EMAIL_NOT_CONFIRMED",
       }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
+      { status: 401, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -76,8 +73,8 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
       user: {
         id: data.user.id,
         email: data.user.email,
-      }
+      },
     }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
+    { status: 200, headers: { "Content-Type": "application/json" } }
   );
 };

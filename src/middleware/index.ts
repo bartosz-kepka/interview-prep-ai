@@ -1,23 +1,20 @@
-import { defineMiddleware } from 'astro:middleware';
-import { createSupabaseServerInstance } from '../db/supabase.client.ts';
+import { defineMiddleware } from "astro:middleware";
+import { createSupabaseServerInstance } from "../db/supabase.client.ts";
 
 // Paths accessible to everyone (both authenticated and unauthenticated users)
-const PUBLIC_PATHS = [
-    '/api/auth/callback',
-  '/error/expired-link'
-];
+const PUBLIC_PATHS = ["/api/auth/callback", "/error/expired-link"];
 
 // Paths only accessible to unauthenticated users (will redirect to / if authenticated)
 const UNAUTHORIZED_ONLY_PATHS = [
-  '/login',
-  '/signup',
-  '/forgot-password',
-  '/reset-password',
-  '/check-email',
-  '/api/auth/login',
-  '/api/auth/signup',
-  '/api/auth/reset-password',
-  '/api/auth/update-password',
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+  "/check-email",
+  "/api/auth/login",
+  "/api/auth/signup",
+  "/api/auth/reset-password",
+  "/api/auth/update-password",
 ];
 
 /**
@@ -33,7 +30,6 @@ const isPublicPath = (pathname: string): boolean => {
 const isUnauthorizedOnlyPath = (pathname: string): boolean => {
   return UNAUTHORIZED_ONLY_PATHS.includes(pathname);
 };
-
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect, site }, next) => {
   // Create Supabase instance with SSR support
@@ -70,7 +66,7 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
   if (isUnauthorizedOnlyPath(pathname)) {
     if (isAuthenticated) {
       // Redirect authenticated users to home
-      return redirect('/');
+      return redirect("/");
     }
     return next();
   }
@@ -78,8 +74,8 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
   // 3. All other paths require authentication (secure by default)
   if (!isAuthenticated) {
     // Redirect unauthenticated users to login with redirect parameter
-    const redirectUrl = new URL('/login', url.origin);
-    redirectUrl.searchParams.set('redirect', pathname + url.search);
+    const redirectUrl = new URL("/login", url.origin);
+    redirectUrl.searchParams.set("redirect", pathname + url.search);
     return redirect(redirectUrl.toString());
   }
 

@@ -1,6 +1,6 @@
-import type { APIRoute } from 'astro';
-import { createSupabaseServerInstance } from '@/db/supabase.client';
-import { resetPasswordSchema } from '@/lib/auth/validation';
+import type { APIRoute } from "astro";
+import { createSupabaseServerInstance } from "@/db/supabase.client";
+import { resetPasswordSchema } from "@/lib/auth/validation";
 
 export const prerender = false;
 
@@ -10,10 +10,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   try {
     body = await request.json();
   } catch {
-    return new Response(
-      JSON.stringify({ error: 'Invalid request format' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: "Invalid request format" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   // Validate input with Zod
@@ -25,10 +25,10 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         fieldErrors[error.path[0] as string] = error.message;
       }
     });
-    return new Response(
-      JSON.stringify({ error: 'Validation failed', fields: fieldErrors }),
-      { status: 422, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: "Validation failed", fields: fieldErrors }), {
+      status: 422,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   const { password, code } = validationResult.data;
@@ -39,11 +39,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     headers: request.headers,
   });
 
-    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (exchangeError) {
-        return redirect('/error/expired-link');
-    }
+  if (exchangeError) {
+    return redirect("/error/expired-link");
+  }
 
   // Update password
   const { data, error } = await supabase.auth.updateUser({
@@ -54,9 +54,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   if (error) {
     return new Response(
       JSON.stringify({
-        error: error.message || 'Failed to update password',
+        error: error.message || "Failed to update password",
       }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -67,8 +67,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
       user: {
         id: data.user.id,
         email: data.user.email,
-      }
+      },
     }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
+    { status: 200, headers: { "Content-Type": "application/json" } }
   );
 };

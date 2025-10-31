@@ -1,6 +1,6 @@
-import { type Page, type Locator } from '@playwright/test';
-import { GeneratorInputForm } from './GeneratorInputForm';
-import { GeneratedQuestionsList } from './GeneratedQuestionsList';
+import { type Page, type Locator } from "@playwright/test";
+import { GeneratorInputForm } from "./GeneratorInputForm";
+import { GeneratedQuestionsList } from "./GeneratedQuestionsList";
 
 export class AIGeneratorPage {
   readonly page: Page;
@@ -16,7 +16,6 @@ export class AIGeneratorPage {
   }
 
   async goto() {
-    await this.page.goto('/generator');
+    await this.page.goto("/generator");
   }
 }
-

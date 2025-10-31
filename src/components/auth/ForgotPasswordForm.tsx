@@ -1,36 +1,43 @@
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/auth/validation"
-import { useAuth } from "@/components/hooks/useAuth"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/auth/validation";
+import { useAuth } from "@/components/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const ForgotPasswordForm: React.FC = () => {
-  const { forgotPassword, isSubmitting, apiError, successMessage } = useAuth()
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+
+  const { forgotPassword, isSubmitting, error } = useAuth();
   const form = useForm<ForgotPasswordInput>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
     },
-  })
+  });
+  const [apiError, setApiError] = React.useState<string | null>(null);
 
-  const onSubmit = (values: ForgotPasswordInput) => {
-    forgotPassword(values, (errors) => {
-      Object.entries(errors).forEach(([field, message]) => {
-        form.setError(field as keyof ForgotPasswordInput, { type: "manual", message })
-      })
-    })
-  }
+  const onSubmit = async (values: ForgotPasswordInput) => {
+    const result = await forgotPassword(values);
+    console.log(result);
+    if (result.error) {
+      setApiError(result.error.error);
+    }
+    if (result.data) {
+      setSuccessMessage("If an account with that email exists, a password reset link has been sent.");
+    }
+    if (result.error?.fields) {
+      Object.entries(result.error.fields).forEach(([field, message]) => {
+        form.setError(field as keyof ForgotPasswordInput, {
+          type: "manual",
+          message: message as string,
+        });
+      });
+    }
+  };
 
   return (
     <Form {...form}>
@@ -53,25 +60,18 @@ export const ForgotPasswordForm: React.FC = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input
-                  type="email"
-                  placeholder="your.email@example.com"
-                  {...field}
-                  disabled={isSubmitting}
-                />
+                <Input type="email" placeholder="your.email@example.com" {...field} disabled={isSubmitting} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <p className="mt-2 text-sm text-muted-foreground">
-          We'll send you a link to reset your password
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">We'll send you a link to reset your password</p>
 
         <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+          {isSubmitting ? "Sending..." : "Send Reset Link"}
         </Button>
       </form>
     </Form>
-  )
-}
+  );
+};

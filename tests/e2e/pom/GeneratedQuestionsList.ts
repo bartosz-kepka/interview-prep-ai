@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator } from "@playwright/test";
 
 export class GeneratedQuestionsList {
   readonly page: Page;
@@ -29,4 +29,3 @@ export class GeneratedQuestionsList {
     return item.locator('[data-test-id="question-select-checkbox"]');
   }
 }
-

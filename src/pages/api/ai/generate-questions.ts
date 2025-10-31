@@ -1,7 +1,7 @@
-import type { APIRoute } from 'astro';
-import { generateQuestionsCommandSchema } from '@/lib/ai/validation.ts';
-import { generateQuestions } from '@/lib/ai/generation.service.ts';
-import { BadGatewayError } from '@/lib/errors.ts';
+import type { APIRoute } from "astro";
+import { generateQuestionsCommandSchema } from "@/lib/ai/validation.ts";
+import { generateQuestions } from "@/lib/ai/generation.service.ts";
+import { BadGatewayError } from "@/lib/errors.ts";
 
 /**
  * POST handler for generating interview questions from a job offer text using AI.
@@ -23,10 +23,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
       // Return a 400 Bad Request response with validation errors.
       return new Response(
         JSON.stringify({
-          error: 'Validation failed',
-          details: validation.error.errors.map(err => err.message),
+          error: "Validation failed",
+          details: validation.error.errors.map((err) => err.message),
         }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -40,23 +40,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const result = await generateQuestions(source_text, userId, supabase);
 
     // Return a 200 OK response with the GenerateQuestionsResponseDto.
-    return new Response(
-      JSON.stringify(result),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify(result), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     // Handle different types of errors with appropriate HTTP status codes.
-    console.error('Error in generate-questions endpoint:', error);
+    console.error("Error in generate-questions endpoint:", error);
     if (error instanceof BadGatewayError) {
-      return new Response(
-        JSON.stringify({ error: 'Bad Gateway' }),
-        { status: 502, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Bad Gateway" }), {
+        status: 502,
+        headers: { "Content-Type": "application/json" },
+      });
     } else {
-      return new Response(
-        JSON.stringify({ error: 'Internal server error' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "Internal server error" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     }
   }
 };
