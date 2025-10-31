@@ -23,6 +23,10 @@ export const LoginForm: React.FC = () => {
     const result = await login(values);
     if (result.error) {
       setApiError(result.error.error);
+      if (result.error.code === "EMAIL_NOT_CONFIRMED") {
+        window.location.href = "/check-email";
+        return;
+      }
     }
     if (result.error?.fields) {
       Object.entries(result.error.fields).forEach(([field, message]) => {

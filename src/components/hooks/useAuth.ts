@@ -1,35 +1,22 @@
-import { useState } from "react";
 import {
   type LoginInput,
   type SignUpInput,
   type ForgotPasswordInput,
   type ResetPasswordInput,
 } from "@/lib/auth/validation";
-import { useApi, type ApiError } from "./useApi";
+import { useApi } from "./useApi";
 
 export const useAuth = () => {
   const { post, isSubmitting } = useApi();
-  const [error, setError] = useState<ApiError | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleAuthRequest = async <T, U>(endpoint: string, data: T, onSuccess?: (data: U) => void) => {
-    setError(null);
-    setSuccessMessage(null);
-    const { data: responseData, error: responseError } = await post<U, T>(endpoint, data);
+    const result = await post<U, T>(endpoint, data);
 
-    if (responseError) {
-      if (responseError.code === "EMAIL_NOT_CONFIRMED") {
-        window.location.href = "/check-email";
-        return;
-      }
-      setError(responseError);
-      return { error: responseError };
+    if (onSuccess && result.data) {
+      onSuccess(result.data);
     }
 
-    if (onSuccess && responseData) {
-      onSuccess(responseData);
-    }
-    return { data: responseData };
+    return result;
   };
 
   const login = async (data: LoginInput) => {
@@ -61,7 +48,5 @@ export const useAuth = () => {
     forgotPassword,
     resetPassword,
     isSubmitting,
-    error,
-    successMessage,
   };
 };
