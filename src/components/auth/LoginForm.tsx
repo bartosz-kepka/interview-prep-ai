@@ -1,150 +1,91 @@
-import React, { useState, useId } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Alert, AlertDescription } from '../ui/alert';
-import { loginSchema, type LoginInput } from '@/lib/auth/validation';
+import * as React from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { loginSchema, type LoginInput } from "@/lib/auth/validation"
+import { useAuth } from "@/components/hooks/useAuth"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export const LoginForm: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<Partial<LoginInput>>({});
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { login, isSubmitting, apiError } = useAuth()
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  })
 
-  const emailId = useId();
-  const passwordId = useId();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-    setApiError(null);
-
-    // Client-side validation
-    const result = loginSchema.safeParse({ email, password });
-
-    if (!result.success) {
-      const fieldErrors: Partial<LoginInput> = {};
-      result.error.errors.forEach((error) => {
-        if (error.path[0]) {
-          fieldErrors[error.path[0] as keyof LoginInput] = error.message;
-        }
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Call login API endpoint
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(result.data),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle validation errors (422)
-        if (response.status === 422 && data.fields) {
-          setErrors(data.fields);
-          return;
-        }
-
-        // Handle email not confirmed error - redirect to check-email
-        if (data.code === 'EMAIL_NOT_CONFIRMED') {
-          window.location.href = '/check-email';
-          return;
-        }
-
-        // Display API error message
-        setApiError(data.error || 'An error occurred during login');
-        return;
-      }
-
-      // Success - redirect to appropriate page
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirectTo = urlParams.get('redirect') || '/';
-      window.location.href = redirectTo;
-    } catch (error) {
-      setApiError('Network error. Please check your connection and try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    if (errors.email) {
-      setErrors((prev) => ({ ...prev, email: undefined }));
-    }
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-    if (errors.password) {
-      setErrors((prev) => ({ ...prev, password: undefined }));
-    }
-  };
+  const onSubmit = (values: LoginInput) => {
+    login(values, (errors) => {
+      Object.entries(errors).forEach(([field, message]) => {
+        form.setError(field as keyof LoginInput, { type: "manual", message })
+      })
+    })
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      {apiError && (
-        <Alert className="mb-4 border-destructive/50 text-destructive">
-          <AlertDescription>{apiError}</AlertDescription>
-        </Alert>
-      )}
-
-      <div>
-        <label htmlFor={emailId} className="block text-sm font-medium mb-2">
-          Email
-        </label>
-        <Input
-          id={emailId}
-          type="email"
-          placeholder="your.email@example.com"
-          value={email}
-          onChange={handleEmailChange}
-          aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? `${emailId}-error` : undefined}
-          disabled={isSubmitting}
-          data-test-id="login-email-input"
-        />
-        {errors.email && (
-          <p id={`${emailId}-error`} className="mt-1 text-sm text-destructive">
-            {errors.email}
-          </p>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        {apiError && (
+          <Alert className="mb-4 border-destructive/50 text-destructive">
+            <AlertDescription>{apiError}</AlertDescription>
+          </Alert>
         )}
-      </div>
 
-      <div>
-        <label htmlFor={passwordId} className="block text-sm font-medium mb-2">
-          Password
-        </label>
-        <Input
-          id={passwordId}
-          type="password"
-          placeholder="Enter your password"
-          value={password}
-          onChange={handlePasswordChange}
-          aria-invalid={!!errors.password}
-          aria-describedby={errors.password ? `${passwordId}-error` : undefined}
-          disabled={isSubmitting}
-          data-test-id="login-password-input"
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="your.email@example.com"
+                  {...field}
+                  disabled={isSubmitting}
+                  data-test-id="login-email-input"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        {errors.password && (
-          <p id={`${passwordId}-error`} className="mt-1 text-sm text-destructive">
-            {errors.password}
-          </p>
-        )}
-      </div>
 
-      <Button type="submit" disabled={isSubmitting} className="w-full" data-test-id="login-submit-button">
-        {isSubmitting ? 'Logging in...' : 'Log In'}
-      </Button>
-    </form>
-  );
-};
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="Enter your password"
+                  {...field}
+                  disabled={isSubmitting}
+                  data-test-id="login-password-input"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" disabled={isSubmitting} className="w-full" data-test-id="login-submit-button">
+          {isSubmitting ? 'Logging in...' : 'Log In'}
+        </Button>
+      </form>
+    </Form>
+  )
+}

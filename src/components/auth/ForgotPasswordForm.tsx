@@ -1,122 +1,77 @@
-import React, { useState, useId } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Alert, AlertDescription } from '../ui/alert';
-import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/auth/validation';
+import * as React from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/auth/validation"
+import { useAuth } from "@/components/hooks/useAuth"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
-interface ForgotPasswordFormProps {
-}
+export const ForgotPasswordForm: React.FC = () => {
+  const { forgotPassword, isSubmitting, apiError, successMessage } = useAuth()
+  const form = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  })
 
-export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = () => {
-  const [email, setEmail] = useState('');
-  const [errors, setErrors] = useState<Partial<ForgotPasswordInput>>({});
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  const emailId = useId();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-    setApiError(null);
-    setSuccessMessage(null);
-
-    const result = forgotPasswordSchema.safeParse({ email });
-
-    if (!result.success) {
-      const fieldErrors: Partial<ForgotPasswordInput> = {};
-      result.error.errors.forEach((error) => {
-        if (error.path[0]) {
-          fieldErrors[error.path[0] as keyof ForgotPasswordInput] = error.message;
-        }
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Call reset password API endpoint
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(result.data),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle validation errors (422)
-        if (response.status === 422 && data.fields) {
-          setErrors(data.fields);
-          return;
-        }
-
-        // Display API error message
-        setApiError(data.error || 'An error occurred');
-        return;
-      }
-
-      // Success
-      setSuccessMessage(data.message);
-      setEmail(''); // Clear the form
-    } catch (error) {
-      setApiError('Network error. Please check your connection and try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    if (errors.email) {
-      setErrors((prev) => ({ ...prev, email: undefined }));
-    }
-  };
+  const onSubmit = (values: ForgotPasswordInput) => {
+    forgotPassword(values, (errors) => {
+      Object.entries(errors).forEach(([field, message]) => {
+        form.setError(field as keyof ForgotPasswordInput, { type: "manual", message })
+      })
+    })
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      {apiError && (
-        <Alert className="mb-4">
-          <AlertDescription>{apiError}</AlertDescription>
-        </Alert>
-      )}
-      {successMessage && (
-        <Alert className="mb-4 border-green-500 bg-green-50 text-green-800">
-          <AlertDescription>{successMessage}</AlertDescription>
-        </Alert>
-      )}
-
-      <div>
-        <label htmlFor={emailId} className="block text-sm font-medium mb-2">
-          Email
-        </label>
-        <Input
-          id={emailId}
-          type="email"
-          placeholder="your.email@example.com"
-          value={email}
-          onChange={handleEmailChange}
-          aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? `${emailId}-error` : undefined}
-        />
-        {errors.email && (
-          <p id={`${emailId}-error`} className="mt-1 text-sm text-destructive">
-            {errors.email}
-          </p>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        {apiError && (
+          <Alert className="mb-4 border-destructive/50 text-destructive">
+            <AlertDescription>{apiError}</AlertDescription>
+          </Alert>
         )}
+        {successMessage && (
+          <Alert className="mb-4 border-green-500 bg-green-50 text-green-800">
+            <AlertDescription>{successMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="your.email@example.com"
+                  {...field}
+                  disabled={isSubmitting}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <p className="mt-2 text-sm text-muted-foreground">
           We'll send you a link to reset your password
         </p>
-      </div>
 
-      <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? 'Sending...' : 'Send Reset Link'}
-      </Button>
-    </form>
-  );
-};
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+        </Button>
+      </form>
+    </Form>
+  )
+}

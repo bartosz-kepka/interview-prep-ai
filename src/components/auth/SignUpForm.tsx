@@ -1,143 +1,92 @@
-import React, { useState, useId } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Alert, AlertDescription } from '../ui/alert';
-import { signUpSchema, type SignUpInput } from '@/lib/auth/validation';
+import * as React from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { signUpSchema, type SignUpInput } from "@/lib/auth/validation"
+import { useAuth } from "@/components/hooks/useAuth"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export const SignUpForm: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<Partial<SignUpInput>>({});
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { signup, isSubmitting, apiError } = useAuth()
+  const form = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  })
 
-  const emailId = useId();
-  const passwordId = useId();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-    setApiError(null);
-
-    // Client-side validation
-    const result = signUpSchema.safeParse({ email, password });
-
-    if (!result.success) {
-      const fieldErrors: Partial<SignUpInput> = {};
-      result.error.errors.forEach((error) => {
-        if (error.path[0]) {
-          fieldErrors[error.path[0] as keyof SignUpInput] = error.message;
-        }
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Call signup API endpoint
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(result.data),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle validation errors (422)
-        if (response.status === 422 && data.fields) {
-          setErrors(data.fields);
-          return;
-        }
-
-        // Display API error message
-        setApiError(data.error || 'An error occurred during sign up');
-        return;
-      }
-
-      // Success - redirect to check-email page
-      window.location.href = '/check-email';
-    } catch (error) {
-      setApiError('Network error. Please check your connection and try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    if (errors.email) {
-      setErrors((prev) => ({ ...prev, email: undefined }));
-    }
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-    if (errors.password) {
-      setErrors((prev) => ({ ...prev, password: undefined }));
-    }
-  };
+  const onSubmit = (values: SignUpInput) => {
+    signup(values, (errors) => {
+      Object.entries(errors).forEach(([field, message]) => {
+        form.setError(field as keyof SignUpInput, { type: "manual", message })
+      })
+    })
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      {apiError && (
-        <Alert className="mb-4 border-destructive/50 text-destructive">
-          <AlertDescription>{apiError}</AlertDescription>
-        </Alert>
-      )}
-
-      <div>
-        <label htmlFor={emailId} className="block text-sm font-medium mb-2">
-          Email
-        </label>
-        <Input
-          id={emailId}
-          type="email"
-          placeholder="your.email@example.com"
-          value={email}
-          onChange={handleEmailChange}
-          aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? `${emailId}-error` : undefined}
-          disabled={isSubmitting}
-        />
-        {errors.email && (
-          <p id={`${emailId}-error`} className="mt-1 text-sm text-destructive">
-            {errors.email}
-          </p>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        {apiError && (
+          <Alert className="mb-4 border-destructive/50 text-destructive">
+            <AlertDescription>{apiError}</AlertDescription>
+          </Alert>
         )}
-      </div>
 
-      <div>
-        <label htmlFor={passwordId} className="block text-sm font-medium mb-2">
-          Password
-        </label>
-        <Input
-          id={passwordId}
-          type="password"
-          placeholder="At least 8 characters"
-          value={password}
-          onChange={handlePasswordChange}
-          aria-invalid={!!errors.password}
-          aria-describedby={errors.password ? `${passwordId}-error` : undefined}
-          disabled={isSubmitting}
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="your.email@example.com"
+                  {...field}
+                  disabled={isSubmitting}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        {errors.password && (
-          <p id={`${passwordId}-error`} className="mt-1 text-sm text-destructive">
-            {errors.password}
-          </p>
-        )}
-        <p className="mt-1 text-sm text-muted-foreground">
+
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="At least 8 characters"
+                  {...field}
+                  disabled={isSubmitting}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+         <p className="mt-1 text-sm text-muted-foreground">
           Must be at least 8 characters long
         </p>
-      </div>
 
-      <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? 'Creating account...' : 'Sign Up'}
-      </Button>
-    </form>
-  );
-};
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? 'Creating account...' : 'Sign Up'}
+        </Button>
+      </form>
+    </Form>
+  )
+}
