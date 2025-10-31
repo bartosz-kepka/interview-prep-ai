@@ -1,5 +1,6 @@
 ---
-import { LogoutButton } from "./auth/LogoutButton";
+import { LogoutButton } from './auth/LogoutButton';
+import { MobileNav } from '@/components/layout/MobileNav';
 
 interface Props {
   user: {
@@ -17,7 +18,7 @@ const { user } = Astro.props;
       <a href="/" class="text-xl font-bold text-foreground hover:text-foreground/80 transition-colors">
         InterviewPrep AI
       </a>
-      <nav class="hidden md:flex items-center gap-4">
+      <nav class="hidden items-center gap-4 md:flex">
         <a href="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors"> Moje pytania </a>
         <a href="/generator" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
           Generator
@@ -25,11 +26,14 @@ const { user } = Astro.props;
       </nav>
     </div>
 
-    <div class="flex items-center gap-4">
+    <div class="hidden items-center gap-4 sm:flex">
       <span class="text-sm text-muted-foreground hidden sm:inline-block">
         {user.email}
       </span>
       <LogoutButton client:load />
+    </div>
+    <div class="flex sm:hidden">
+      <MobileNav client:load userEmail={user.email} />
     </div>
   </div>
 </header>
