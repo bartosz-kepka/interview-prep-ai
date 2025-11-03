@@ -37,7 +37,7 @@ export const useApi = () => {
       return {
         data: null,
         error: {
-          message: "Network error. Please check your connection and try again.",
+          message: errorMessage,
           code: "NETWORK_ERROR",
         },
       };

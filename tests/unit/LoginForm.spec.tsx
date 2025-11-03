@@ -7,7 +7,7 @@ import "@testing-library/jest-dom";
 // Mock the loginSchema for simplicity in tests, focusing on component behavior
 vi.mock("@/lib/auth/validation", () => ({
   loginSchema: {
-    safeParse: (data: any) => {
+    safeParse: (data: unknown) => {
       if (!data.email || !data.email.includes("@")) {
         return {
           success: false,
@@ -35,9 +35,7 @@ describe("LoginForm", () => {
   // Mock window.location.href
   const { location } = window;
   beforeEach(() => {
-    // @ts-ignore
     delete window.location;
-    // @ts-ignore
     window.location = { href: "" };
 
     // Mock fetch
@@ -186,7 +184,7 @@ describe("LoginForm", () => {
   });
 
   it('should disable form elements and show "Logging in..." during submission', async () => {
-    let resolveFetch: (value: any) => void;
+    let resolveFetch: (value: unknown) => void;
     const fetchPromise = new Promise((resolve) => {
       resolveFetch = resolve;
     });
@@ -205,6 +203,7 @@ describe("LoginForm", () => {
     expect(screen.getByLabelText(/password/i)).toBeDisabled();
 
     // Resolve the fetch and check if the form is enabled again
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     resolveFetch!({ ok: true, json: () => Promise.resolve({}) });
 
     await waitFor(() => {

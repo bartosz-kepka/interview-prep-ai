@@ -59,6 +59,7 @@ export const useAIGenerator = () => {
         return;
       }
 
+      // eslint-disable-next-line react-compiler/react-compiler
       window.location.href = "/";
     },
     [generationLogId, post]

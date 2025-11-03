@@ -43,7 +43,7 @@ test.describe("AI-01: AI Question Generator", () => {
     aiGeneratorPage = new AIGeneratorPage(page);
   });
 
-  test("should generate questions for a valid job description", async ({ page }) => {
+  test("should generate questions for a valid job description", async () => {
     // Step 2: Fill the form and click generate
     await aiGeneratorPage.generatorInputForm.generateQuestions(JOB_DESCRIPTION);
 

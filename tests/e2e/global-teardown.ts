@@ -1,11 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
-import type { FullConfig } from "@playwright/test";
 import dotenv from "dotenv";
 import path from "path";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
 
-async function globalTeardown(config: FullConfig) {
+async function globalTeardown() {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_KEY;
   const e2eEmail = process.env.E2E_EMAIL;
@@ -38,7 +37,7 @@ async function globalTeardown(config: FullConfig) {
     console.log("Successfully cleaned questions table.");
   }
 
-  const { error: logsError, data } = await supabase.from("ai_generation_logs").delete().eq("user_id", e2eUserId);
+  const { error: logsError } = await supabase.from("ai_generation_logs").delete().eq("user_id", e2eUserId);
 
   if (logsError) {
     console.error("Error cleaning ai_generation_logs table:", logsError);
