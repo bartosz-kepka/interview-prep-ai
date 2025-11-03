@@ -1,15 +1,15 @@
 import { useState } from "react";
 
-export type ApiError<T = Record<string, string>> = {
+export interface ApiError<T = Record<string, string>> {
   error: string;
   fields?: T;
   code?: string;
-};
+}
 
-export type ApiResponse<T> = {
+export interface ApiResponse<T> {
   data: T | null;
   error: ApiError | null;
-};
+}
 
 export const useApi = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
