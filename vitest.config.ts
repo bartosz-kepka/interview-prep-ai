@@ -6,5 +6,8 @@ export default getViteConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     globals: true,
+    coverage: {
+      reporter: ["text", "json", "html"],
+    },
   },
 });
