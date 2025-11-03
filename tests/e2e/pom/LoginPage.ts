@@ -17,7 +17,7 @@ export class LoginPage {
 
   async goto(options?: { redirectTo?: string }) {
     const url = options?.redirectTo ? `/login?redirect=${encodeURIComponent(options.redirectTo)}` : "/login";
-    await this.page.goto(url);
+    await this.page.goto(url, { waitUntil: "networkidle" });
   }
 
   async login(email: string, password?: string) {

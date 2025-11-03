@@ -4,8 +4,8 @@ import { AIGeneratorPage } from "./pom/AIGeneratorPage";
 
 // UWAGA: Zastąp poniższe dane rzeczywistymi danymi użytkownika testowego
 // lub skonfiguruj zmienne środowiskowe.
-const TEST_USER_EMAIL = process.env.E2E_EMAIL || "test@example.com";
-const TEST_USER_PASSWORD = process.env.E2E_PASSWORD || "password123";
+const TEST_USER_EMAIL = process.env.E2E_EMAIL;
+const TEST_USER_PASSWORD = process.env.E2E_PASSWORD;
 
 const JOB_DESCRIPTION = `
 As a Senior Frontend Developer at [Company Name], you will be responsible for building and maintaining 
