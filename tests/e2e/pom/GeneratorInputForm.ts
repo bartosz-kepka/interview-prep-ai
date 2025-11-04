@@ -13,6 +13,7 @@ export class GeneratorInputForm {
 
   async generateQuestions(text: string) {
     await this.textarea.fill(text);
+    await this.page.waitForTimeout(100); // Wait for any potential debounce or state update
     await this.submitButton.click();
   }
 }

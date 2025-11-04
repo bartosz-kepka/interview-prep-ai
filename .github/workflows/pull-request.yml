@@ -16,13 +16,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: \${{ runner.os }}-node-\${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            \${{ runner.os }}-node-
       - name: Install dependencies
         run: npm ci
       - name: Lint code
@@ -39,13 +32,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: \${{ runner.os }}-node-\${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            \${{ runner.os }}-node-
       - name: Install dependencies
         run: npm ci
       - name: Run unit tests
@@ -69,13 +55,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: \${{ runner.os }}-node-\${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            \${{ runner.os }}-node-
       - name: Install dependencies
         run: npm ci
       - name: Install Playwright browsers
@@ -83,13 +62,13 @@ jobs:
       - name: Run E2E tests
         run: npm run test:e2e
         env:
-          SUPABASE_URL: \${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: \${{ secrets.SUPABASE_KEY }}
-          OPENROUTER_API_KEY: \${{ secrets.OPENROUTER_API_KEY }}
-          PROD: \${{ secrets.PROD }}
-          E2E_USER_ID: \${{ secrets.E2E_USER_ID }}
-          E2E_EMAIL: \${{ secrets.E2E_EMAIL }}
-          E2E_PASSWORD: \${{ secrets.E2E_PASSWORD }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          PROD: ${{ secrets.PROD }}
+          E2E_USER_ID: ${{ secrets.E2E_USER_ID }}
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -107,7 +86,7 @@ jobs:
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@v4
         with:
-          issue-number: \${{ github.event.pull_request.number }}
+          issue-number: ${{ github.event.pull_request.number }}
           body: |
             All checks passed successfully!
             - ✅ Linting

@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 export const ForgotPasswordForm: React.FC = () => {
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
 
-  const { forgotPassword, isSubmitting, error } = useAuth();
+  const { forgotPassword, isSubmitting } = useAuth();
   const form = useForm<ForgotPasswordInput>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
@@ -22,7 +22,6 @@ export const ForgotPasswordForm: React.FC = () => {
 
   const onSubmit = async (values: ForgotPasswordInput) => {
     const result = await forgotPassword(values);
-    console.log(result);
     if (result.error) {
       setApiError(result.error.error);
     }
@@ -66,7 +65,7 @@ export const ForgotPasswordForm: React.FC = () => {
             </FormItem>
           )}
         />
-        <p className="mt-2 text-sm text-muted-foreground">We'll send you a link to reset your password</p>
+        <p className="mt-2 text-sm text-muted-foreground">We&apos;`ll send you a link to reset your password</p>
 
         <Button type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting ? "Sending..." : "Send Reset Link"}

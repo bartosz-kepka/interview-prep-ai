@@ -22,6 +22,7 @@ export const useAuth = () => {
   const login = async (data: LoginInput) => {
     return handleAuthRequest("/api/auth/login", data, () => {
       const urlParams = new URLSearchParams(window.location.search);
+      // eslint-disable-next-line react-compiler/react-compiler
       window.location.href = urlParams.get("redirect") || "/";
     });
   };

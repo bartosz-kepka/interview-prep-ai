@@ -60,7 +60,7 @@ export const GeneratedQuestionsList: React.FC<GeneratedQuestionsListProps> = ({
 
   const selectedCount = viewModels.filter((vm) => vm.selected).length;
   const allSelected = viewModels.length > 0 && viewModels.every((vm) => vm.selected);
-  const someSelected = viewModels.some((vm) => vm.selected);
+  // const someSelected = viewModels.some((vm) => vm.selected);
 
   return (
     <div className="space-y-6" data-test-id="generated-questions-list">
