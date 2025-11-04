@@ -86,7 +86,7 @@ jobs:
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@v4
         with:
-          issue-number: \${{ github.event.pull_request.number }}
+          issue-number: ${{ github.event.pull_request.number }}
           body: |
             All checks passed successfully!
             - ✅ Linting
