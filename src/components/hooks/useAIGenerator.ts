@@ -1,9 +1,5 @@
 import { useState, useCallback } from "react";
-import type {
-  QuestionProposal,
-  GenerateQuestionsResponseDto,
-  SaveGeneratedQuestionsCommand,
-} from "../../types";
+import type { QuestionProposal, GenerateQuestionsResponseDto, SaveGeneratedQuestionsCommand } from "../../types";
 import { useApi } from "./useApi";
 
 type Status = "idle" | "generating" | "success" | "error" | "saving";
@@ -15,27 +11,30 @@ export const useAIGenerator = () => {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
 
-  const handleGenerate = useCallback(async (sourceText: string) => {
-    setStatus("generating");
-    setError(null);
+  const handleGenerate = useCallback(
+    async (sourceText: string) => {
+      setStatus("generating");
+      setError(null);
 
-    const { data, error } = await post<GenerateQuestionsResponseDto, { source_text: string }>(
-      "/api/ai/generate-questions",
-      { source_text: sourceText }
-    );
+      const { data, error } = await post<GenerateQuestionsResponseDto, { source_text: string }>(
+        "/api/ai/generate-questions",
+        { source_text: sourceText }
+      );
 
-    if (error) {
-      setError(error.error);
-      setStatus("error");
-      return;
-    }
+      if (error) {
+        setError(error.error);
+        setStatus("error");
+        return;
+      }
 
-    if (data) {
-      setQuestionProposals(data.question_proposals);
-      setGenerationLogId(data.generation_log_id);
-      setStatus("success");
-    }
-  }, [post]);
+      if (data) {
+        setQuestionProposals(data.question_proposals);
+        setGenerationLogId(data.generation_log_id);
+        setStatus("success");
+      }
+    },
+    [post]
+  );
 
   const handleSave = useCallback(
     async (questions: SaveGeneratedQuestionsCommand["questions"]) => {
@@ -52,10 +51,7 @@ export const useAIGenerator = () => {
         questions,
       };
 
-      const { error } = await post<never, SaveGeneratedQuestionsCommand>(
-        "/api/ai/save-questions",
-        command
-      );
+      const { error } = await post<never, SaveGeneratedQuestionsCommand>("/api/ai/save-questions", command);
 
       if (error) {
         setError(error.error);
@@ -63,6 +59,7 @@ export const useAIGenerator = () => {
         return;
       }
 
+      // eslint-disable-next-line react-compiler/react-compiler
       window.location.href = "/";
     },
     [generationLogId, post]

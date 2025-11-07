@@ -64,7 +64,6 @@ export const GeneratedQuestionItem: React.FC<GeneratedQuestionItemProps> = ({
             placeholder="Add your answer here..."
             data-test-id="answer-textarea"
             rows={3}
-            placeholder="Provide an answer..."
           />
         </div>
       </CardContent>

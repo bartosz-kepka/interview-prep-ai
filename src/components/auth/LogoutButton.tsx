@@ -19,12 +19,10 @@ export const LogoutButton = () => {
         // Redirect to login page after successful logout
         window.location.href = "/login";
       } else {
-        const data = await response.json();
-        console.error("Logout failed:", data.error);
         alert("Nie udało się wylogować. Spróbuj ponownie.");
       }
-    } catch (error) {
-      console.error("Logout error:", error);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
       alert("Wystąpił błąd podczas wylogowywania.");
     } finally {
       setIsLoading(false);

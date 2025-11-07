@@ -6,6 +6,7 @@ Frontend - Astro z React dla komponentów interaktywnych:
 - Tailwind 4 pozwala na wygodne stylowanie aplikacji
 - Shadcn/ui zapewnia bibliotekę dostępnych komponentów React, na których oprzemy UI
 - Zod 3 do walidacji danych po stronie klienta i serwera
+- React Hook Form do zarządzania formularzami i ich walidacji
 
 Backend - Supabase jako kompleksowe rozwiązanie backendowe:
 

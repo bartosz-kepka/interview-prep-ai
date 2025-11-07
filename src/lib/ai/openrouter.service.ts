@@ -7,7 +7,7 @@ interface GenerateOptions<T extends z.ZodTypeAny> {
   userMessage: string;
   schema: T;
   model?: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
 
 const DEFAULT_MODEL = "x-ai/grok-code-fast-1";
@@ -61,10 +61,11 @@ export class OpenRouterService {
       throw new BadGatewayError(errorMessage);
     }
 
-    let data: any;
+    let data: unknown;
     try {
       data = await response.json();
-    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
       throw new InternalServerError("Failed to parse JSON response from OpenRouter API");
     }
 
@@ -73,10 +74,11 @@ export class OpenRouterService {
       throw new InternalServerError("Invalid response from OpenRouter API: missing content");
     }
 
-    let parsed: any;
+    let parsed: unknown;
     try {
       parsed = JSON.parse(content);
-    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
       throw new InternalServerError("Failed to parse JSON content from OpenRouter API response");
     }
 

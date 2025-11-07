@@ -24,6 +24,7 @@ export const LoginForm: React.FC = () => {
     if (result.error) {
       setApiError(result.error.error);
       if (result.error.code === "EMAIL_NOT_CONFIRMED") {
+        // eslint-disable-next-line react-compiler/react-compiler
         window.location.href = "/check-email";
         return;
       }

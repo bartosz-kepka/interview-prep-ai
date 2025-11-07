@@ -5,7 +5,7 @@ import { mapAuthError } from "@/lib/auth/errors";
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, cookies, url }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   // Parse and validate request body
   let body;
   try {
