@@ -3,6 +3,7 @@ import type { TablesInsert } from "@/db/database.types.ts";
 import { BadGatewayError, InternalServerError } from "../errors";
 import { OpenRouterService } from "./openrouter.service";
 import { z } from "zod";
+import { OPENROUTER_API_KEY as openRouterApiKey } from "astro:env/server";
 
 /**
  * Zod schema for the AI-generated questions response.
@@ -46,7 +47,6 @@ export const generateQuestions = async (
 
   try {
     // Step 2: Call AI using OpenRouterService
-    const openRouterApiKey = import.meta.env.OPENROUTER_API_KEY;
     if (!openRouterApiKey) {
       throw new InternalServerError("OpenRouter API key is not configured");
     }

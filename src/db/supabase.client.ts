@@ -4,8 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "../db/database.types.ts";
 
-const supabaseUrl = import.meta.env.SUPABASE_URL;
-const supabaseKey = import.meta.env.SUPABASE_KEY;
+import { SUPABASE_URL as supabaseUrl, SUPABASE_KEY as supabaseKey, PROD as prod } from "astro:env/server";
 
 // Legacy client for client-side usage (if needed)
 export const supabaseClient = createClient<Database>(supabaseUrl, supabaseKey);
@@ -14,7 +13,7 @@ export type SupabaseClient = typeof supabaseClient;
 // SSR cookie options
 export const cookieOptions: CookieOptionsWithName = {
   path: "/",
-  secure: import.meta.env.PROD,
+  secure: prod,
   httpOnly: true,
   sameSite: "lax",
 };
