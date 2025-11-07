@@ -8,6 +8,7 @@ Autor: GitHub Copilot
 Ten dokument opisuje strategię refaktoryzacji aplikacji `interview-prep-ai` w celu wdrożenia zasad Domain-Driven Design. Celem jest poprawa struktury projektu, zwiększenie jego utrzymywalności, skalowalności i ułatwienie dalszego rozwoju poprzez organizację kodu wokół logiki biznesowej, a nie warstw technicznych.
 
 **Główne cele:**
+
 - **Izolacja Domen Biznesowych**: Wyraźne oddzielenie od siebie różnych części systemu, aby zmniejszyć złożoność.
 - **Poprawa Czytelności**: Struktura kodu powinna odzwierciedlać procesy biznesowe opisane w PRD.
 - **Zwiększenie Testowalności**: Ułatwienie pisania testów jednostkowych i integracyjnych dla logiki biznesowej.
@@ -117,4 +118,3 @@ src/
 4.  **Dokumentacja**: Zaktualizuj `copilot-instructions.md`, aby odzwierciedlał nową strukturę projektu.
 
 Postępując zgodnie z tym planem, aplikacja zyska solidną, skalowalną architekturę, która będzie łatwiejsza w utrzymaniu i dalszym rozwoju.
-

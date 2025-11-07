@@ -80,5 +80,4 @@ jobs:
             - ✅ Linting
             - ✅ Unit Tests
             - ✅ E2E Tests
-          reactions: '+1'
-
+          reactions: "+1"

@@ -21,6 +21,6 @@ export default defineConfig({
       SUPABASE_KEY: envField.string({ context: "server", access: "secret" }),
       OPENROUTER_API_KEY: envField.string({ context: "server", access: "secret" }),
       PROD: envField.boolean({ context: "server", access: "secret" }),
-    }
-  }
+    },
+  },
 });

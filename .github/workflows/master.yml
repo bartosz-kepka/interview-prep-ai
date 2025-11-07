@@ -34,4 +34,3 @@ jobs:
           name: unit-test-coverage
           path: coverage/
           retention-days: 5
-

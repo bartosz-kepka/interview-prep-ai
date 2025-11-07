@@ -23,9 +23,9 @@ Implementacja będzie oparta o technologie zdefiniowane w dokumencie `@tech-stac
 - **Astro (`Header.astro`):** Główny komponent nagłówka zostanie zmodyfikowany w celu dodania logiki responsywnej.
 - **React (`MobileNav.tsx`):** Nowy, interaktywny komponent React zostanie stworzony do zarządzania stanem i wyświetlaniem nawigacji mobilnej.
 - **Shadcn/ui:** Wykorzystane zostaną gotowe, dostępne komponenty:
-    - `Sheet`: Do implementacji wysuwanego panelu bocznego.
-    - `Button`: Jako przycisk uruchamiający menu ("hamburger").
-    - Ikony (np. z `lucide-react`): Do wizualnej reprezentacji przycisku menu.
+  - `Sheet`: Do implementacji wysuwanego panelu bocznego.
+  - `Button`: Jako przycisk uruchamiający menu ("hamburger").
+  - Ikony (np. z `lucide-react`): Do wizualnej reprezentacji przycisku menu.
 - **Tailwind CSS:** Użyte zostaną klasy pomocnicze do zarządzania widocznością elementów na różnych szerokościach ekranu (np. `md:hidden`, `hidden md:flex`).
 
 ## 4. Wymagania Funkcjonalne
@@ -56,4 +56,3 @@ Implementacja będzie oparta o technologie zdefiniowane w dokumencie `@tech-stac
 - [ ] Panel można zamknąć w intuicyjny sposób (przycisk 'X', kliknięcie w tło).
 - [ ] Na ekranach o szerokości `md` i większych, wygląd i działanie nagłówka nie uległy zmianie.
 - [ ] Rozwiązanie jest w pełni dostępne (obsługa z klawiatury, poprawne atrybuty ARIA dla czytników ekranu).
-
