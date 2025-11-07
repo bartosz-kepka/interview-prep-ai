@@ -27,5 +27,5 @@ Testowanie:
 
 CI/CD i Hosting:
 
-- Github Actions do tworzenia pipeline’ów CI/CD
+- Github Actions do tworzenia pipeline’ów CI/CD 
 - Cloudflare Pages do hostingu aplikacji Astro
