@@ -122,7 +122,7 @@ export const updateQuestion = async (
     })
     .eq("id", questionId)
     .eq("user_id", userId)
-    .select("id, question, answer, source, created_at, updated_at")
+    .select("id, question, answer, source, created_at")
     .single();
 
   if (error) {

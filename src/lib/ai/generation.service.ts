@@ -40,7 +40,6 @@ export const generateQuestions = async (
     .single();
 
   if (logError) {
-    console.log(logError);
     throw new InternalServerError(`Failed to create generation log: ${logError.message}`);
   }
 

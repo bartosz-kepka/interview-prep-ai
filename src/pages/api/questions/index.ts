@@ -19,7 +19,8 @@ export const GET: APIRoute = async ({ locals, url }) => {
 
     const paginatedResponse = await listQuestions(locals.supabase, locals.user.id, validationResult.data);
     return new Response(JSON.stringify(paginatedResponse), { status: 200 });
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
     return new Response("An unexpected error occurred.", { status: 500 });
   }
 };
@@ -40,7 +41,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const newQuestion = await createQuestion(locals.supabase, locals.user.id, validationResult.data);
 
     return new Response(JSON.stringify(newQuestion), { status: 201 });
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
     return new Response("An unexpected error occurred.", { status: 500 });
   }
 };
