@@ -5,7 +5,7 @@
 
 InterviewPrep AI is a web application designed to help job candidates effectively prepare for interviews. It allows users to generate a personalized set of interview questions directly from the text of a job posting, moving beyond generic, one-size-fits-all question lists.
 
-## Table of Contents
+## Table of Contents 
 
 - [Tech Stack](#tech-stack)
 - [Getting Started Locally](#getting-started-locally)
