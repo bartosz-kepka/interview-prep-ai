@@ -1,6 +1,6 @@
-import type { SupabaseClient } from "../db/supabase.client";
-import type { SaveGeneratedQuestionsCommand } from "../types";
-import type { TablesInsert } from "../db/database.types";
+import type { SupabaseClient } from "../../db/supabase.client";
+import type { SaveGeneratedQuestionsCommand } from "../../types";
+import type { TablesInsert } from "../../db/database.types";
 import { NotFoundError, UnprocessableEntityError } from "../errors";
 
 /**
