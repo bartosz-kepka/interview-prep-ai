@@ -1,6 +1,7 @@
 import { type APIRoute } from "astro";
 import { getQuestionById, updateQuestion, deleteQuestion } from "src/lib/services/questions.service";
 import { QuestionIdSchema, UpdateQuestionCommandSchema } from "src/lib/questions/validation";
+import { NotFoundError, UnprocessableEntityError } from "src/lib/errors";
 
 export const prerender = false;
 
@@ -18,11 +19,10 @@ export const GET: APIRoute = async ({ params, locals }) => {
   try {
     const question = await getQuestionById(locals.supabase, locals.user.id, idValidationResult.data);
     return new Response(JSON.stringify(question), { status: 200 });
-  } catch (error: any) {
-    if (error.name === "NotFoundError") {
+  } catch (error) {
+    if (error instanceof NotFoundError) {
       return new Response(error.message, { status: 404 });
     }
-    console.error(error);
     return new Response("An unexpected error occurred.", { status: 500 });
   }
 };
@@ -54,11 +54,10 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     );
 
     return new Response(JSON.stringify(updatedQuestion), { status: 200 });
-  } catch (error: any) {
-    if (error.name === "UnprocessableEntityError") {
+  } catch (error) {
+    if (error instanceof UnprocessableEntityError) {
       return new Response(error.message, { status: 422 });
     }
-    console.error(error);
     return new Response("An unexpected error occurred.", { status: 500 });
   }
 };
@@ -77,11 +76,10 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
     await deleteQuestion(locals.supabase, locals.user.id, idValidationResult.data);
     return new Response(null, { status: 204 });
-  } catch (error: any) {
-    if (error.name === "UnprocessableEntityError") {
+  } catch (error) {
+    if (error instanceof UnprocessableEntityError) {
       return new Response(error.message, { status: 422 });
     }
-    console.error(error);
     return new Response("An unexpected error occurred.", { status: 500 });
   }
 };

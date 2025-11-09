@@ -6,6 +6,8 @@ import type {
   PaginationDto,
   UpdateQuestionResponseDto,
   UpdateQuestionCommand,
+  CreateQuestionCommand,
+  CreateQuestionResponseDto,
 } from "@/types";
 import { useDebounce } from "./useDebounce";
 
@@ -41,8 +43,8 @@ export const useQuestions = () => {
         setQuestions((prev) => (page === 1 ? response.data.data : [...prev, ...response.data.data]));
         setPagination(response.data.pagination);
       }
-    } catch (error) {
-      console.error("Failed to fetch questions", error);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
       // TODO: Set error state to display in the UI
     } finally {
       setIsLoading(false);
@@ -66,15 +68,15 @@ export const useQuestions = () => {
     }
   }, [pagination, debouncedSearchTerm, fetchQuestions]);
 
-  const addQuestion = async (data: any) => {
-    const response = await post("/api/questions", data);
+  const addQuestion = async (data: CreateQuestionCommand) => {
+    const response = await post<CreateQuestionResponseDto, CreateQuestionCommand>("/api/questions", data);
     if (!response.error) {
       refreshQuestions();
     }
     return response;
   };
 
-  const updateQuestion = async (id: string, data: any) => {
+  const updateQuestion = async (id: string, data: UpdateQuestionCommand) => {
     const response = await patch<UpdateQuestionResponseDto, UpdateQuestionCommand>(`/api/questions/${id}`, data);
     if (!response.error) {
       refreshQuestions();

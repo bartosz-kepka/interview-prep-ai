@@ -39,7 +39,7 @@ export const QuestionsList: React.FC<QuestionsListProps> = ({
         ))}
       </div>
       {!hasMore && questions.length > 0 && (
-        <p className="text-center text-muted-foreground mt-8">You've reached the end of the list.</p>
+        <p className="text-center text-muted-foreground mt-8">You&apos;ve reached the end of the list.</p>
       )}
     </>
   );

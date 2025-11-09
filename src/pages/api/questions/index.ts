@@ -20,7 +20,6 @@ export const GET: APIRoute = async ({ locals, url }) => {
     const paginatedResponse = await listQuestions(locals.supabase, locals.user.id, validationResult.data);
     return new Response(JSON.stringify(paginatedResponse), { status: 200 });
   } catch (error) {
-    console.error(error);
     return new Response("An unexpected error occurred.", { status: 500 });
   }
 };
@@ -42,7 +41,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     return new Response(JSON.stringify(newQuestion), { status: 201 });
   } catch (error) {
-    console.error(error);
     return new Response("An unexpected error occurred.", { status: 500 });
   }
 };

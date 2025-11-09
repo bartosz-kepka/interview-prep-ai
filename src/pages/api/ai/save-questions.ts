@@ -43,8 +43,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
         headers: { "Content-Type": "application/json" },
       });
     }
-    // Unexpected error
-    console.error("Unexpected error in save-questions endpoint:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

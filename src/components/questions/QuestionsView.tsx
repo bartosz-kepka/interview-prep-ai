@@ -50,9 +50,9 @@ export const QuestionsView: React.FC = () => {
   const handleSubmit = async (data: CreateQuestionCommand | UpdateQuestionCommand) => {
     let response;
     if (modalState.type === "add") {
-      response = await addQuestion(data);
-    } else {
-      response = await updateQuestion(modalState.question.id, data);
+      response = await addQuestion(data as CreateQuestionCommand);
+    } else if (modalState.type === "edit" || modalState.type === "view") {
+      response = await updateQuestion(modalState.question.id, data as UpdateQuestionCommand);
     }
 
     if (response && !response.error) {

@@ -34,7 +34,7 @@ export const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> =
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete the question:
             <br />
-            <strong className="mt-2 block">"{question?.question}"</strong>
+            <strong className="mt-2 block">&quot;{question?.question}&quot;</strong>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

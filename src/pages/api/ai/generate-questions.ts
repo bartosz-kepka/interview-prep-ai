@@ -43,7 +43,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return new Response(JSON.stringify(result), { status: 200, headers: { "Content-Type": "application/json" } });
   } catch (error) {
     // Handle different types of errors with appropriate HTTP status codes.
-    console.error("Error in generate-questions endpoint:", error);
     if (error instanceof BadGatewayError) {
       return new Response(JSON.stringify({ error: "Bad Gateway" }), {
         status: 502,
