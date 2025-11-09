@@ -9,8 +9,6 @@ const AIGeneratorView: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8" role="main" data-test-id="ai-generator-view">
-      <h1 className="text-3xl font-bold mb-8">AI Interview Question Generator</h1>
-
       {error && (
         <Alert className="mb-4" data-test-id="generator-error-alert">
           <AlertDescription>{error}</AlertDescription>

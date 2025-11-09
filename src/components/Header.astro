@@ -10,6 +10,11 @@ interface Props {
 }
 
 const { user } = Astro.props;
+
+const homeClass =
+  Astro.url.pathname === "/questions" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground";
+const generatorClass =
+  Astro.url.pathname === "/generator" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground";
 ---
 
 <header class="border-b border-border bg-background">
@@ -19,10 +24,8 @@ const { user } = Astro.props;
         InterviewPrep AI
       </a>
       <nav class="hidden items-center gap-4 md:flex">
-        <a href="/" class="text-sm text-muted-foreground hover:text-foreground transition-colors"> My questions </a>
-        <a href="/generator" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
-          Generator
-        </a>
+        <a href="/questions" class={`text-sm transition-colors ${homeClass}`}>My questions</a>
+        <a href="/generator" class={`text-sm transition-colors ${generatorClass}`}>Generator</a>
       </nav>
     </div>
 
@@ -33,7 +36,7 @@ const { user } = Astro.props;
       <LogoutButton client:load />
     </div>
     <div class="flex md:hidden">
-      <MobileNav client:load userEmail={user.email} />
+      <MobileNav client:load userEmail={user.email} currentPath={Astro.url.pathname} />
     </div>
   </div>
 </header>

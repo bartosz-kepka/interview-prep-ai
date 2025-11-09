@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 
-export const MobileNav = ({ userEmail }: { userEmail: string | undefined }) => {
+export const MobileNav = ({ userEmail, currentPath }: { userEmail: string | undefined; currentPath: string }) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -16,12 +16,19 @@ export const MobileNav = ({ userEmail }: { userEmail: string | undefined }) => {
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
         <div className="flex flex-col items-center space-y-6 py-8">
-          <a href="/" className="text-lg font-semibold text-foreground transition-colors hover:text-foreground/80">
+          <a
+            href="/questions"
+            className={`text-lg font-semibold transition-colors ${
+              currentPath === "/questions" ? "text-primary" : "text-foreground hover:text-foreground/80"
+            }`}
+          >
             My questions
           </a>
           <a
             href="/generator"
-            className="text-lg font-semibold text-foreground transition-colors hover:text-foreground/80"
+            className={`text-lg font-semibold transition-colors ${
+              currentPath === "/generator" ? "text-primary" : "text-foreground hover:text-foreground/80"
+            }`}
           >
             Generator
           </a>
