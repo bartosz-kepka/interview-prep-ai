@@ -1,43 +1,47 @@
 import React from "react";
-import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronsUpDown } from "lucide-react";
 import type { QuestionListItemDto } from "@/types";
+import { FilePenLine, Trash2 } from "lucide-react";
 
 interface QuestionItemProps {
   question: QuestionListItemDto;
   onEdit: (question: QuestionListItemDto) => void;
+  onView: (question: QuestionListItemDto) => void;
   onDelete: (question: QuestionListItemDto) => void;
 }
 
-export const QuestionItem: React.FC<QuestionItemProps> = ({ question, onEdit, onDelete }) => {
+export const QuestionItem: React.FC<QuestionItemProps> = ({ question, onEdit, onView, onDelete }) => {
+  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.target as HTMLElement).closest("button")) {
+      return;
+    }
+    onView(question);
+  };
+
   return (
-    <Card>
-      <Collapsible>
-        <div className="flex items-center justify-between p-6">
-          <CardTitle className="text-lg font-semibold flex-1 pr-4">{question.question}</CardTitle>
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="w-9 p-0 shrink-0">
-              <ChevronsUpDown className="h-4 w-4" />
-              <span className="sr-only">Toggle</span>
-            </Button>
-          </CollapsibleTrigger>
+    <Card
+      className="flex flex-col transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+      onClick={handleCardClick}
+    >
+      <CardHeader className="flex flex-row items-start justify-between gap-4">
+        <CardTitle className="text-lg font-semibold line-clamp-2">{question.question}</CardTitle>
+        <div className="flex shrink-0">
+          <Button variant="ghost" size="icon" onClick={() => onEdit(question)}>
+            <FilePenLine className="h-4 w-4" />
+            <span className="sr-only">Edit</span>
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => onDelete(question)}>
+            <Trash2 className="h-4 w-4 text-destructive" />
+            <span className="sr-only">Delete</span>
+          </Button>
         </div>
-        <CollapsibleContent>
-          <CardContent className="pt-0">
-            <p className="whitespace-pre-wrap text-muted-foreground">{question.answer || "No answer provided."}</p>
-          </CardContent>
-        </CollapsibleContent>
-      </Collapsible>
-      <CardFooter className="flex justify-end gap-2 bg-muted/50 p-4 border-t">
-        <Button variant="outline" size="sm" onClick={() => onEdit(question)}>
-          Edit
-        </Button>
-        <Button variant="destructive" size="sm" onClick={() => onDelete(question)}>
-          Delete
-        </Button>
-      </CardFooter>
+      </CardHeader>
+      <CardContent className="flex-grow pt-0">
+        <p className={`whitespace-pre-wrap text-muted-foreground line-clamp-4 ${!question.answer ? "italic" : ""}`}>
+          {question.answer || "No answer provided."}
+        </p>
+      </CardContent>
     </Card>
   );
 };

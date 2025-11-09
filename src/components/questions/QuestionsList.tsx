@@ -8,6 +8,7 @@ interface QuestionsListProps {
   questions: QuestionListItemDto[];
   isLoading: boolean;
   onEdit: (question: QuestionListItemDto) => void;
+  onView: (question: QuestionListItemDto) => void;
   onDelete: (question: QuestionListItemDto) => void;
   onAddQuestion: () => void;
 }
@@ -16,6 +17,7 @@ export const QuestionsList: React.FC<QuestionsListProps> = ({
   questions,
   isLoading,
   onEdit,
+  onView,
   onDelete,
   onAddQuestion,
 }) => {
@@ -28,9 +30,9 @@ export const QuestionsList: React.FC<QuestionsListProps> = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {questions.map((question) => (
-        <QuestionItem key={question.id} question={question} onEdit={onEdit} onDelete={onDelete} />
+        <QuestionItem key={question.id} question={question} onEdit={onEdit} onView={onView} onDelete={onDelete} />
       ))}
     </div>
   );

@@ -21,7 +21,7 @@ export const UpdateQuestionCommandSchema = z
 
 export const ListQuestionsQuerySchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
-  page_size: z.coerce.number().int().positive().optional().default(10),
+  page_size: z.coerce.number().int().positive().optional().default(12),
   sort_by: z.string().optional().default("created_at"),
   sort_order: z.enum(["asc", "desc"]).optional().default("desc"),
   search: z.string().optional(),

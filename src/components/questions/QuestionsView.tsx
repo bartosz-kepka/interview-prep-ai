@@ -12,6 +12,7 @@ type ModalState =
   | { type: "none" }
   | { type: "add" }
   | { type: "edit"; question: QuestionListItemDto }
+  | { type: "view"; question: QuestionListItemDto }
   | { type: "delete"; question: QuestionListItemDto };
 
 export const QuestionsView: React.FC = () => {
@@ -38,6 +39,10 @@ export const QuestionsView: React.FC = () => {
     setModalState({ type: "edit", question });
   };
 
+  const handleViewQuestion = (question: QuestionListItemDto) => {
+    setModalState({ type: "view", question });
+  };
+
   const handleDeleteQuestion = (question: QuestionListItemDto) => {
     setModalState({ type: "delete", question });
   };
@@ -46,7 +51,7 @@ export const QuestionsView: React.FC = () => {
     let response;
     if (modalState.type === "add") {
       response = await addQuestion(data);
-    } else if (modalState.type === "edit") {
+    } else {
       response = await updateQuestion(modalState.question.id, data);
     }
 
@@ -82,6 +87,7 @@ export const QuestionsView: React.FC = () => {
         questions={questions}
         isLoading={isLoading}
         onEdit={handleEditQuestion}
+        onView={handleViewQuestion}
         onDelete={handleDeleteQuestion}
         onAddQuestion={handleAddQuestion}
       />
@@ -94,11 +100,12 @@ export const QuestionsView: React.FC = () => {
       )}
 
       <AddEditQuestionModal
-        isOpen={modalState.type === "add" || modalState.type === "edit"}
+        isOpen={modalState.type === "add" || modalState.type === "edit" || modalState.type === "view"}
         onOpenChange={() => setModalState({ type: "none" })}
         onSubmit={handleSubmit}
-        initialData={modalState.type === "edit" ? modalState.question : undefined}
+        initialData={modalState.type === "edit" || modalState.type === "view" ? modalState.question : undefined}
         isSubmitting={isSubmitting}
+        mode={modalState.type === "view" ? "view" : modalState.type === "edit" ? "edit" : "add"}
       />
       <DeleteConfirmationDialog
         isOpen={modalState.type === "delete"}
