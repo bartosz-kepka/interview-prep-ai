@@ -86,6 +86,7 @@ export const QuestionsView: React.FC = () => {
       <QuestionsList
         questions={questions}
         isLoading={isLoading}
+        hasMore={hasMore}
         onEdit={handleEditQuestion}
         onView={handleViewQuestion}
         onDelete={handleDeleteQuestion}

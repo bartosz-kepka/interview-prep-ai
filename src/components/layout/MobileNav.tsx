@@ -17,7 +17,7 @@ export const MobileNav = ({ userEmail }: { userEmail: string | undefined }) => {
         </SheetHeader>
         <div className="flex flex-col items-center space-y-6 py-8">
           <a href="/" className="text-lg font-semibold text-foreground transition-colors hover:text-foreground/80">
-            Moje pytania
+            My questions
           </a>
           <a
             href="/generator"

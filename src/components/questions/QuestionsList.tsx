@@ -7,6 +7,7 @@ import { EmptyState } from "./EmptyState";
 interface QuestionsListProps {
   questions: QuestionListItemDto[];
   isLoading: boolean;
+  hasMore: boolean;
   onEdit: (question: QuestionListItemDto) => void;
   onView: (question: QuestionListItemDto) => void;
   onDelete: (question: QuestionListItemDto) => void;
@@ -16,6 +17,7 @@ interface QuestionsListProps {
 export const QuestionsList: React.FC<QuestionsListProps> = ({
   questions,
   isLoading,
+  hasMore,
   onEdit,
   onView,
   onDelete,
@@ -30,10 +32,15 @@ export const QuestionsList: React.FC<QuestionsListProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {questions.map((question) => (
-        <QuestionItem key={question.id} question={question} onEdit={onEdit} onView={onView} onDelete={onDelete} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {questions.map((question) => (
+          <QuestionItem key={question.id} question={question} onEdit={onEdit} onView={onView} onDelete={onDelete} />
+        ))}
+      </div>
+      {!hasMore && questions.length > 0 && (
+        <p className="text-center text-muted-foreground mt-8">You've reached the end of the list.</p>
+      )}
+    </>
   );
 };

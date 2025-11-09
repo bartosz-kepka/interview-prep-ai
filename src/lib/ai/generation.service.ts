@@ -4,6 +4,7 @@ import { BadGatewayError, InternalServerError } from "../errors";
 import { OpenRouterService } from "./openrouter.service";
 import { z } from "zod";
 import { OPENROUTER_API_KEY as openRouterApiKey } from "astro:env/server";
+import type { GenerateQuestionsResponseDto } from "@/types";
 
 /**
  * Zod schema for the AI-generated questions response.
@@ -54,7 +55,15 @@ export const generateQuestions = async (
     const openRouterService = new OpenRouterService(openRouterApiKey);
 
     const aiResponse = await openRouterService.generateStructuredResponse({
-      systemMessage: "You are an expert interviewer. Generate technical questions based on the user's input.",
+      systemMessage: `Act as an expert interviewer and hiring manager for a top-tier company. Your goal is to formulate a list of thought-provoking interview questions based on the context provided by the user.
+
+The questions must be:
+- **Targeted:** Directly related to the technologies, skills, and concepts in the user's text.
+- **In-depth:** Go beyond surface-level knowledge. Ask about trade-offs, architecture, and problem-solving approaches.
+- **Open-ended:** Encourage detailed, conceptual answers. Avoid yes/no or simple factual questions.
+- **Practical:** Relate to real-world scenarios and challenges.
+
+Generate a list of 5 to 10 high-quality questions. Ensure they are phrased clearly and professionally.`,
       userMessage: source_text,
       schema: QuestionsSchema,
     });
