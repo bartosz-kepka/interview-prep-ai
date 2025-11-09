@@ -73,6 +73,10 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
 
   // 3. All other paths require authentication (secure by default)
   if (!isAuthenticated) {
+    // For API routes, return 401 Unauthorized instead of redirecting
+    if (pathname.startsWith("/api/")) {
+      return new Response("Unauthorized", { status: 401 });
+    }
     // Redirect unauthenticated users to login with redirect parameter
     const redirectUrl = new URL("/login", url.origin);
     redirectUrl.searchParams.set("redirect", pathname + url.search);

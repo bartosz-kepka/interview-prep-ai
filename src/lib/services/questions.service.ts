@@ -1,5 +1,14 @@
 import type { SupabaseClient } from "../../db/supabase.client";
-import type { SaveGeneratedQuestionsCommand } from "../../types";
+import type {
+  CreateQuestionCommand,
+  CreateQuestionResponseDto,
+  ListQuestionsQuery,
+  PaginatedQuestionsResponseDto,
+  QuestionDto,
+  SaveGeneratedQuestionsCommand,
+  UpdateQuestionCommand,
+  UpdateQuestionResponseDto,
+} from "../../types";
 import type { TablesInsert } from "../../db/database.types";
 import { NotFoundError, UnprocessableEntityError } from "../errors";
 
@@ -45,4 +54,131 @@ export const saveGeneratedQuestions = async (
 
   // Return the IDs of the saved questions
   return insertedQuestions.map((q) => q.id);
+};
+
+/**
+ * Creates a new question for a user.
+ */
+export const createQuestion = async (
+  supabase: SupabaseClient,
+  userId: string,
+  command: CreateQuestionCommand
+): Promise<CreateQuestionResponseDto> => {
+  const { data, error } = await supabase
+    .from("questions")
+    .insert([
+      {
+        user_id: userId,
+        question: command.question,
+        answer: command.answer ?? null,
+        source: "user",
+      },
+    ])
+    .select("id, question, answer, source, created_at")
+    .single();
+
+  if (error) {
+    throw new UnprocessableEntityError("Failed to create the question.");
+  }
+
+  return data;
+};
+
+/**
+ * Retrieves a single question by its ID for a specific user.
+ */
+export const getQuestionById = async (
+  supabase: SupabaseClient,
+  userId: string,
+  questionId: string
+): Promise<QuestionDto> => {
+  const { data, error } = await supabase
+    .from("questions")
+    .select("id, question, answer, source, created_at, updated_at")
+    .eq("id", questionId)
+    .eq("user_id", userId)
+    .single();
+
+  if (error || !data) {
+    throw new NotFoundError("Question not found.");
+  }
+
+  return data;
+};
+
+/**
+ * Updates a question for a specific user.
+ */
+export const updateQuestion = async (
+  supabase: SupabaseClient,
+  userId: string,
+  questionId: string,
+  command: UpdateQuestionCommand
+): Promise<UpdateQuestionResponseDto> => {
+  const { data, error } = await supabase
+    .from("questions")
+    .update({
+      ...command,
+    })
+    .eq("id", questionId)
+    .eq("user_id", userId)
+    .select("id, question, answer, source, created_at, updated_at")
+    .single();
+
+  if (error) {
+    throw new UnprocessableEntityError("Failed to update the question.");
+  }
+
+  return data;
+};
+
+/**
+ * Deletes a question for a specific user.
+ */
+export const deleteQuestion = async (supabase: SupabaseClient, userId: string, questionId: string): Promise<void> => {
+  const { error } = await supabase.from("questions").delete().eq("id", questionId).eq("user_id", userId);
+
+  if (error) {
+    throw new UnprocessableEntityError("Failed to delete the question.");
+  }
+};
+
+/**
+ * Lists questions for a user with pagination, sorting, and search.
+ */
+export const listQuestions = async (
+  supabase: SupabaseClient,
+  userId: string,
+  query: ListQuestionsQuery
+): Promise<PaginatedQuestionsResponseDto> => {
+  const { page, page_size, sort_by, sort_order, search } = query;
+  const rangeFrom = (page - 1) * page_size;
+  const rangeTo = rangeFrom + page_size - 1;
+
+  let rpcQuery = supabase.from("questions").select("*", { count: "exact" }).eq("user_id", userId);
+
+  if (search) {
+    rpcQuery = rpcQuery.ilike("question", `%${search}%`);
+  }
+
+  rpcQuery = rpcQuery.order(sort_by, { ascending: sort_order === "asc" }).range(rangeFrom, rangeTo);
+
+  const { data, error, count } = await rpcQuery;
+
+  if (error) {
+    throw new UnprocessableEntityError("Failed to retrieve questions.");
+  }
+
+  const totalItems = count ?? 0;
+  const totalPages = Math.ceil(totalItems / page_size);
+
+  return {
+    data: data ?? [],
+    pagination: {
+      page,
+      page_size,
+      total_items: totalItems,
+      total_pages: totalPages,
+    },
+  };
 };

@@ -1,4 +1,10 @@
-import type { Tables, TablesInsert } from "./db/database.types";
+import type { z } from "zod";
+import type { Tables } from "./db/database.types";
+import type {
+  CreateQuestionCommandSchema,
+  ListQuestionsQuerySchema,
+  UpdateQuestionCommandSchema,
+} from "./lib/questions/validation";
 
 /**
  * Represents a single question item as returned by the API.
@@ -34,10 +40,15 @@ export interface PaginatedQuestionsResponseDto {
 }
 
 /**
+ * Query model for listing questions with pagination, sorting, and search.
+ */
+export type ListQuestionsQuery = z.infer<typeof ListQuestionsQuerySchema>;
+
+/**
  * Command model for creating a new question.
  * It contains only the fields required from the user.
  */
-export type CreateQuestionCommand = Pick<TablesInsert<"questions">, "question" | "answer">;
+export type CreateQuestionCommand = z.infer<typeof CreateQuestionCommandSchema>;
 
 /**
  * DTO for the response when creating a new question.
@@ -49,7 +60,7 @@ export type CreateQuestionResponseDto = QuestionListItemDto;
  * Command model for updating an existing question.
  * All fields are optional.
  */
-export type UpdateQuestionCommand = Partial<CreateQuestionCommand>;
+export type UpdateQuestionCommand = z.infer<typeof UpdateQuestionCommandSchema>;
 
 /**
  * DTO for the response when updating a question.
