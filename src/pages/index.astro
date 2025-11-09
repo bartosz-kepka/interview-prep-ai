@@ -1,3 +1,5 @@
 ---
+// This is the root page, which redirects authenticated users to their questions page.
+// Unauthenticated users will be redirected to the login page by the middleware.
 return Astro.redirect("/questions");
 ---

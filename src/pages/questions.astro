@@ -1,0 +1,10 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { QuestionsView } from "@/components/questions/QuestionsView";
+---
+
+<Layout title="My Questions">
+  <main class="container mx-auto px-4 py-8">
+    <QuestionsView client:load />
+  </main>
+</Layout>

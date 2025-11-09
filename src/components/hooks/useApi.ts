@@ -25,7 +25,21 @@ export const useApi = () => {
         },
       });
 
-      const result = await response.json();
+      const bodyText = await response.text();
+
+      // Handle responses with empty bodies (like 204 No Content)
+      if (!bodyText) {
+        if (response.ok) {
+          return { data: null, error: null };
+        }
+        // If response is not ok and body is empty, create a default error.
+        return {
+          data: null,
+          error: { error: response.statusText, code: String(response.status) },
+        };
+      }
+
+      const result = JSON.parse(bodyText);
 
       if (!response.ok) {
         return { data: null, error: result };
@@ -37,7 +51,7 @@ export const useApi = () => {
       return {
         data: null,
         error: {
-          message: errorMessage,
+          error: errorMessage,
           code: "NETWORK_ERROR",
         },
       };

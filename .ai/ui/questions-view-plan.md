@@ -116,11 +116,11 @@ Większość wymaganych typów (DTO) jest już zdefiniowana w `src/types.ts`. Ni
 - **`UpdateQuestionCommand`**: Typ danych przesyłanych do API podczas aktualizacji pytania.
 - **`ModalState`**: Typ pomocniczy do zarządzania stanem modali w `QuestionsView`.
   ```typescript
-  type ModalState = 
-    | { type: 'none' }
-    | { type: 'add' }
-    | { type: 'edit', question: QuestionListItemDto }
-    | { type: 'delete', question: QuestionListItemDto };
+  type ModalState =
+    | { type: "none" }
+    | { type: "add" }
+    | { type: "edit"; question: QuestionListItemDto }
+    | { type: "delete"; question: QuestionListItemDto };
   ```
 
 ## 6. Zarządzanie stanem

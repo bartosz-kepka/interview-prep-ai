@@ -64,9 +64,9 @@ export type UpdateQuestionCommand = z.infer<typeof UpdateQuestionCommandSchema>;
 
 /**
  * DTO for the response when updating a question.
- * It returns the full question object, including `updated_at`.
+ * It returns the updated question without the `updated_at` field.
  */
-export type UpdateQuestionResponseDto = QuestionDto;
+export type UpdateQuestionResponseDto = QuestionListItemDto;
 
 /**
  * Command model for generating questions from a source text using AI.
